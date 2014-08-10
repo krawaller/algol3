@@ -14,10 +14,21 @@ var Algol = {},
  * @returns {Object} A new position object
  */
 Algol.moveInDir = function(pos,dir,instruction,board){
-	var x = pos.x, y = pos.y, forward = instruction.forward, right = instruction.right,newpos;
-	switch((board || {}).shape){
-		default: // board with squares
+	var x = pos.x, y = pos.y, forward = instruction.forward, right = instruction.right,newpos, shape = (board||{}).shape||"square";
+	switch(shape){
+		case "hex":
 			switch(dir){
+				case 1: newpos = {x: x+right, y: y-forward*2-right}; break;
+				case 2: newpos = right<0 ? {x: x+forward, y: y-forward+right*2} : {x: x+forward+right, y: y-forward+right}; break;
+				case 3: newpos = right<0 ? {x: x+forward-right, y: y+forward-right} : {x: x+forward, y: y+forward+right*2}; break;
+				case 4: newpos = {x: x-right, y: y+forward*2-right}; break;
+				case 5: newpos = right<0 ? {x: x-forward, y: y+forward-right*2} : {x: x-forward-right, y: y+forward-right}; break;
+				case 6: newpos = right<0 ? {x: x-forward+right, y: y-forward-right} : {x: x-forward, y: y-forward-right*2}; break;
+			}
+			break;
+		case "square":
+			switch(dir){
+				case 1: newpos = {x: x+right, y: y-forward}; break;
 				case 2: newpos = {x: x+forward+right, y: y-forward+right}; break;
 				case 3: newpos = {x: x+forward, y: y+right}; break;
 				case 4: newpos = {x: x+forward-right, y: y+forward+right}; break;
@@ -25,9 +36,11 @@ Algol.moveInDir = function(pos,dir,instruction,board){
 				case 6: newpos = {x: x-forward-right, y: y+forward-right}; break;
 				case 7: newpos = {x: x-forward, y: y-right}; break;
 				case 8: newpos = {x: x-forward+right, y: y-forward-right}; break;
-				default: newpos = {x: x+right, y: y-forward}; break;
 			}
+			break;
+		default: throw "Unknown board shape: "+shape;
 	}
+	if (!newpos) throw "Illegal direction "+dir+" for shape "+shape;
 	return _.extend({ykx:this.posToYkx(newpos)},newpos);
 };
 

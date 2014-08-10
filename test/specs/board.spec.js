@@ -39,6 +39,30 @@ describe("the board functions",function(){
 				expect(res).toEqual({x:4,y:7,ykx:7004});
 			});
 		});
+		describe("when sanitychecking on a hex board",function(){
+			var board = {shape:"hex"};
+			it("should walk southeast (right) correctly",function(){
+				var position = {x:3,y:4},
+					dir = 3,
+					instruction = { forward: 1, right: 2 },
+					res = Algol.moveInDir(position,dir,instruction,board);
+				expect(res).toEqual({x:4,y:9,ykx:9004});
+			});
+			it("should walk southwest (left) correctly",function(){
+				var position = {x:5,y:4},
+					dir = 5,
+					instruction = { forward: 2, right: -1 },
+					res = Algol.moveInDir(position,dir,instruction,board);
+				expect(res).toEqual({x:3,y:8,ykx:8003});
+			});
+			it("should walk northwest (left) correctly",function(){
+				var position = {x:5,y:4},
+					dir = 6,
+					instruction = { forward: 2, right: -2 },
+					res = Algol.moveInDir(position,dir,instruction,board);
+				expect(res).toEqual({x:1,y:4,ykx:4001});
+			});
+		});
 	});
 
 	describe("the dirRelativeTo",function(){
