@@ -23,44 +23,65 @@ describe("the board functions",function(){
 			expect(context.posToYkx).toHaveBeenCalledOnce();
 			expect(context.posToYkx.firstCall.args).toEqual([{x:7,y:5}]);
 		});
-		describe("when sanitychecking on a rectangle board",function(){
-			it("should walk east correctly",function(){
-				var position = {x:3,y:4},
-					dir = 3,
-					instruction = { forward: 4, right: 1 },
-					res = Algol.moveInDir(position,dir,instruction);
-				expect(res).toEqual({x:7,y:5,ykx:5007});
-			});
-			it("should walk southwest correctly",function(){
-				var position = {x:5,y:4},
-					dir = 6,
-					instruction = { forward: 2, right: -1 },
-					res = Algol.moveInDir(position,dir,instruction);
-				expect(res).toEqual({x:4,y:7,ykx:7004});
+		var sets = [
+			["square",{x:5,y:5},[
+				[{forward:2,right:1},[ [6,3],[8,4],[7,6],[6,8],[4,7],[2,6],[3,4],[4,2] ]]
+			]],
+			["hex",{x:4,y:8},[
+				[{forward:2,right:1},[ [5,3],[7,7],[6,12],[3,13],[1,9],[2,4] ]]
+			]]
+		];
+		_.each(sets,function(set){
+			var shape=set[0], board = {shape:shape}, start = set[1], tests = set[2];
+			describe("when moving from ["+start.x+";"+start.y+"] on a "+shape+" board",function(){
+				_.each(tests,function(test){
+					var instruction = test[0], dirtargets = test[1];
+					describe("when heading "+instruction.forward+" forward and "+instruction.right+" right",function(){
+						_.each(dirtargets,function(dirtarget,n){
+							var dir = n+1;
+							describe("in direction "+dir,function(){
+								var result = Algol.moveInDir(start,dir,instruction,board);
+								it("should land on expected x coordinate",function(){
+									expect(result.x).toEqual(dirtarget[0]);
+								});
+								it("should land on expected y coordinate",function(){
+									expect(result.y).toEqual(dirtarget[1]);
+								});
+							});
+						});
+					});
+				});
 			});
 		});
-		describe("when sanitychecking on a hex board",function(){
-			var board = {shape:"hex"};
-			it("should walk southeast (right) correctly",function(){
-				var position = {x:3,y:4},
-					dir = 3,
-					instruction = { forward: 1, right: 2 },
-					res = Algol.moveInDir(position,dir,instruction,board);
-				expect(res).toEqual({x:4,y:9,ykx:9004});
+		describe("when moving on a rectangle board",function(){
+			var start = {x:5,y:5}, instruction = {forward:2,right:1}, tests = [
+				[6,3],[8,4],[7,6],[6,8],[4,7],[2,6],[3,4],[4,2]
+			];
+			_.each(tests,function(test,n){
+				var result = Algol.moveInDir(start,n+1,instruction);
+				it("should land on right x when walking in dir "+(n+1),function(){
+					expect(result.x).toEqual(test[0]);
+				});
+				it("should land on right y when walking in dir "+(n+1),function(){
+					expect(result.y).toEqual(test[1]);
+				});
 			});
-			it("should walk southwest (left) correctly",function(){
-				var position = {x:5,y:4},
-					dir = 5,
-					instruction = { forward: 2, right: -1 },
-					res = Algol.moveInDir(position,dir,instruction,board);
-				expect(res).toEqual({x:3,y:8,ykx:8003});
-			});
-			it("should walk northwest (left) correctly",function(){
-				var position = {x:5,y:4},
-					dir = 6,
-					instruction = { forward: 2, right: -2 },
-					res = Algol.moveInDir(position,dir,instruction,board);
-				expect(res).toEqual({x:1,y:4,ykx:4001});
+		});
+		describe("when moving on a hex board",function(){
+			var start = {x:4,y:8}, board = {shape:"hex"};
+			describe("with a positive right value",function(){
+				var instruction = {forward:2,right:1}, tests = [
+					[5,3],[7,7],[6,12],[3,13],[1,9],[2,4]
+				];
+				_.each(tests,function(test,n){
+					var result = Algol.moveInDir(start,n+1,instruction,board);
+					it("should land on right x when walking in dir "+(n+1),function(){
+						expect(result.x).toEqual(test[0]);
+					});
+					it("should land on right y when walking in dir "+(n+1),function(){
+						expect(result.y).toEqual(test[1]);
+					});
+				});
 			});
 		});
 	});

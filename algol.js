@@ -5,6 +5,14 @@ var Algol = {},
 
 // €€€€€€€€€€€€€€€€€€€€€€€€€€€ B O A R D  F U N C T I O N S €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€*/
 
+
+// each movemod is [xforward,xright,yforward,yright]. indexed using DIR-1
+var movemods = {
+	hexright: [ [0,1,-2,-1], [1,1,-1,1], [1,0,1,2], [0,-1,2,1], [-1,-1,1,-1], [-1,0,-1,-2] ],
+	hexleft: [ [0,1,-2,-1], [1,0,-1,2], [1,-1,1,-1], [0,-1,2,-1], [-1,0,0,-2], [-1,1,-1,-1] ],
+	square: [ [0,1,-1,0], [1,1,-1,1], [1,0,0,1], [1,-1,1,1], [0,-1,1,0], [-1,-1,1,-1], [-1,0,0,-1], [-1,1,-1,-1] ]
+};
+
 /**
  * Finds a new position on the board
  * @param {Object} pos A position object with x and y props
@@ -21,7 +29,7 @@ Algol.moveInDir = function(pos,dir,instruction,board){
 				case 1: newpos = {x: x+right, y: y-forward*2-right}; break;
 				case 2: newpos = right<0 ? {x: x+forward, y: y-forward+right*2} : {x: x+forward+right, y: y-forward+right}; break;
 				case 3: newpos = right<0 ? {x: x+forward-right, y: y+forward-right} : {x: x+forward, y: y+forward+right*2}; break;
-				case 4: newpos = {x: x-right, y: y+forward*2-right}; break;
+				case 4: newpos = {x: x-right, y: y+forward*2+right}; break;
 				case 5: newpos = right<0 ? {x: x-forward, y: y+forward-right*2} : {x: x-forward-right, y: y+forward-right}; break;
 				case 6: newpos = right<0 ? {x: x-forward+right, y: y-forward-right} : {x: x-forward, y: y-forward-right*2}; break;
 			}
