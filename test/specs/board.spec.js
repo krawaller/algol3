@@ -28,7 +28,8 @@ describe("the board functions",function(){
 				[{forward:2,right:1},[ [6,3],[8,4],[7,6],[6,8],[4,7],[2,6],[3,4],[4,2] ]]
 			]],
 			["hex",{x:4,y:8},[
-				[{forward:2,right:1},[ [5,3],[7,7],[6,12],[3,13],[1,9],[2,4] ]]
+				[{forward:2,right:1},[ [5,3],[7,7],[6,12],[3,13],[1,9],[2,4] ]],
+				[{forward:2,right:-1},[ [3,5],[5,5],[6,8],[5,11],[3,11],[2,8] ]]
 			]]
 		];
 		_.each(sets,function(set){
@@ -53,37 +54,6 @@ describe("the board functions",function(){
 				});
 			});
 		});
-		describe("when moving on a rectangle board",function(){
-			var start = {x:5,y:5}, instruction = {forward:2,right:1}, tests = [
-				[6,3],[8,4],[7,6],[6,8],[4,7],[2,6],[3,4],[4,2]
-			];
-			_.each(tests,function(test,n){
-				var result = Algol.moveInDir(start,n+1,instruction);
-				it("should land on right x when walking in dir "+(n+1),function(){
-					expect(result.x).toEqual(test[0]);
-				});
-				it("should land on right y when walking in dir "+(n+1),function(){
-					expect(result.y).toEqual(test[1]);
-				});
-			});
-		});
-		describe("when moving on a hex board",function(){
-			var start = {x:4,y:8}, board = {shape:"hex"};
-			describe("with a positive right value",function(){
-				var instruction = {forward:2,right:1}, tests = [
-					[5,3],[7,7],[6,12],[3,13],[1,9],[2,4]
-				];
-				_.each(tests,function(test,n){
-					var result = Algol.moveInDir(start,n+1,instruction,board);
-					it("should land on right x when walking in dir "+(n+1),function(){
-						expect(result.x).toEqual(test[0]);
-					});
-					it("should land on right y when walking in dir "+(n+1),function(){
-						expect(result.y).toEqual(test[1]);
-					});
-				});
-			});
-		});
 	});
 
 	describe("the dirRelativeTo",function(){
@@ -91,6 +61,17 @@ describe("the board functions",function(){
 		describe("when turning on a rectangle board",function(){
 			it("should calc southeast relative to west as northeast",function(){
 				expect(Algol.dirRelativeTo(4,7)).toEqual(2);
+			});
+		});
+		describe("when turning on a hex board",function(){
+			var board = {shape:"hex"}, tests = [ [1,1,1], [2,1,2], [6,3,2] ];
+			_.each(tests,function(test){
+				var initial = test[0],
+					lookin = test[1],
+					expected = test[2];
+				it("should correctly answer "+expected+" when starting in "+initial+" and looking in dir "+lookin,function(){
+					expect(Algol.dirRelativeTo(initial,lookin,board)).toEqual(expected);
+				});
 			});
 		});
 	});
@@ -131,11 +112,77 @@ describe("the board functions",function(){
 
 	describe("the generateBoardSquares function",function(){
 		it("is defined",function(){ expect(typeof Algol.generateBoardSquares).toEqual("function"); });
-		it("returns correct objs",function(){
-			var boarddef = {x:3,y:2,shape:"rectangle"},
-				clrs = {1001:{colour:"white",x:1,y:1},1002:{colour:"black",x:2,y:1},1003:{colour:"white",x:3,y:1},
-						2001:{colour:"black",x:1,y:2},2002:{colour:"white",x:2,y:2},2003:{colour:"black",x:3,y:2}};
-			expect(Algol.generateBoardSquares(boarddef)).toEqual(clrs);
+		describe("for square boards",function(){
+			it("returns correct objs",function(){
+				var boarddef = {x:3,y:2,shape:"square"},
+					clrs = {1001:{colour:"white",x:1,y:1},1002:{colour:"black",x:2,y:1},1003:{colour:"white",x:3,y:1},
+							2001:{colour:"black",x:1,y:2},2002:{colour:"white",x:2,y:2},2003:{colour:"black",x:3,y:2}};
+				expect(Algol.generateBoardSquares(boarddef)).toEqual(clrs);
+			});
+		});
+		describe("for hex board",function(){
+			describe("when 1;1 exists",function(){
+				var boarddef = {x:4,y:8,shape:"hex"},
+					clrdata = [
+						[1001,"red","red","red",1,1],[2002,"green","green","red",2,2],[1003,"blue","green","blue",3,1],[2004,"red","blue","blue",4,2],
+						[3001,"red","green","green",1,3],[4002,"green","blue","green",2,4],[3003,"blue","blue","red",3,3],[4004,"red","red","red",4,4],
+						[5001,"red","blue","blue",1,5],[6002,"green","red","blue",2,6],[5003,"blue","red","green",3,5],[6004,"red","green","green",4,6],
+						[7001,"red","red","red",1,7],[8002,"green","green","red"],[7003,"blue","green","blue",3,7],[8004,"red","blue","blue",4,8]
+					],
+					clrs = _.reduce(clrdata,function(memo,data){
+						return _.extend(memo,_.object([data[0]],[{
+							x: data[4],
+							y: data[5],
+							columncolour: data[1],
+							uphillcolour: data[2],
+							downhillcolour: data[3]
+						}]));
+					},{}),
+					result = Algol.generateBoardSquares(boarddef);
+				it("contains the expected number of hexes",function(){
+					expect(_.keys(result).length).toEqual(_.keys(clrs).length);
+				});
+				_.each(clrs,function(val,key){
+					it("contains hex "+key,function(){
+						expect(result.hasOwnProperty(key)).toEqual(true);
+					});
+					var square = result[key], compto = clrs[key];
+					it("painted "+key+" with the correct colors",function(){
+						expect([square.columncolour,square.uphillcolour,square.downhillcolour]).toEqual([compto.columncolour,compto.uphillcolour,compto.downhillcolour]);
+					});
+				});
+			});
+			describe("when 1;1 doesnt exists",function(){
+				var boarddef = {x:4,y:8,shape:"hex",notopleft:true},
+					clrdata = [
+						[2001,"red","red","red",1,2],[1002,"green","red","blue",2,1],[2003,"blue","green","blue",3,2],[1004,"red","green","green",4,1],
+						[4001,"red","green","green",1,4],[3002,"green","green","red",2,3],[4003,"blue","blue","red",3,4],[3004,"red","blue","blue",4,3],
+						[6001,"red","blue","blue",1,6],[5002,"green","blue","green",2,5],[6003,"blue","red","green",3,6],[5004,"red","red","red",4,5],
+						[8001,"red","red","red",1,8],[7002,"green","red","blue",1,8],[8003,"blue","green","blue",3,8],[7004,"red","green","green",4,7]
+					],
+					clrs = _.reduce(clrdata,function(memo,data){
+						return _.extend(memo,_.object([data[0]],[{
+							x: data[4],
+							y: data[5],
+							columncolour: data[1],
+							uphillcolour: data[2],
+							downhillcolour: data[3]
+						}]));
+					},{}),
+					result = Algol.generateBoardSquares(boarddef);
+				it("contains the expected number of hexes",function(){
+					expect(_.keys(result).length).toEqual(_.keys(clrs).length);
+				});
+				_.each(clrs,function(val,key){
+					it("contains hex "+key,function(){
+						expect(result.hasOwnProperty(key)).toEqual(true);
+					});
+					var square = result[key], compto = clrs[key];
+					it("painted "+key+" with the correct colors",function(){
+						expect([square.columncolour,square.uphillcolour,square.downhillcolour]).toEqual([compto.columncolour,compto.uphillcolour,compto.downhillcolour]);
+					});
+				});
+			});
 		});
 	});
 });

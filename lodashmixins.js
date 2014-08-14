@@ -11,6 +11,13 @@ _.mixin({
 			case 1: return _.quickfind(_.rest(arr,index),tester);
 			default: return arr[index];
 		}
+	},
+	combine: function(arr1,arr2){
+		return _.reduce(arr1,function(memo,i1){
+			return memo.concat(_.map(arr2,function(i2){
+				return [i1,i2];
+			}));
+		},[]);
 	}
 });
 

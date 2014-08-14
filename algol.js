@@ -8,9 +8,8 @@ var Algol = {},
 
 // each movemod is [xforward,xright,yforward,yright]. indexed using DIR-1
 var movemods = {
-	hexright: [ [0,1,-2,-1], [1,1,-1,1], [1,0,1,2], [0,-1,2,1], [-1,-1,1,-1], [-1,0,-1,-2] ],
-	hexleft: [ [0,1,-2,-1], [1,0,-1,2], [1,-1,1,-1], [0,-1,2,-1], [-1,0,0,-2], [-1,1,-1,-1] ],
-	square: [ [0,1,-1,0], [1,1,-1,1], [1,0,0,1], [1,-1,1,1], [0,-1,1,0], [-1,-1,1,-1], [-1,0,0,-1], [-1,1,-1,-1] ]
+	hex: [ [0,1,-2,-1], [1,1,-1,1], [1,0,1,2], [0,-1,2,1], [-1,-1,1,-1], [-1,0,-1,-2] ],
+	square: [ [0,1,-1,0], [1,1,-1,1], [1,0,0,1], [1,-1,1,1], [0,-1,1,0], [-1,-1,1,-1], [-1,0,0,-1], [-1,1,-1,-1] ]
 };
 
 /**
@@ -22,32 +21,11 @@ var movemods = {
  * @returns {Object} A new position object
  */
 Algol.moveInDir = function(pos,dir,instruction,board){
-	var x = pos.x, y = pos.y, forward = instruction.forward, right = instruction.right,newpos, shape = (board||{}).shape||"square";
-	switch(shape){
-		case "hex":
-			switch(dir){
-				case 1: newpos = {x: x+right, y: y-forward*2-right}; break;
-				case 2: newpos = right<0 ? {x: x+forward, y: y-forward+right*2} : {x: x+forward+right, y: y-forward+right}; break;
-				case 3: newpos = right<0 ? {x: x+forward-right, y: y+forward-right} : {x: x+forward, y: y+forward+right*2}; break;
-				case 4: newpos = {x: x-right, y: y+forward*2+right}; break;
-				case 5: newpos = right<0 ? {x: x-forward, y: y+forward-right*2} : {x: x-forward-right, y: y+forward-right}; break;
-				case 6: newpos = right<0 ? {x: x-forward+right, y: y-forward-right} : {x: x-forward, y: y-forward-right*2}; break;
-			}
-			break;
-		case "square":
-			switch(dir){
-				case 1: newpos = {x: x+right, y: y-forward}; break;
-				case 2: newpos = {x: x+forward+right, y: y-forward+right}; break;
-				case 3: newpos = {x: x+forward, y: y+right}; break;
-				case 4: newpos = {x: x+forward-right, y: y+forward+right}; break;
-				case 5: newpos = {x: x-right, y: y+forward}; break;
-				case 6: newpos = {x: x-forward-right, y: y+forward-right}; break;
-				case 7: newpos = {x: x-forward, y: y-right}; break;
-				case 8: newpos = {x: x-forward+right, y: y-forward-right}; break;
-			}
-			break;
-		default: throw "Unknown board shape: "+shape;
-	}
+	var forward = instruction.forward,
+		right = instruction.right,
+		shape = (board||{}).shape||"square",
+		mods = movemods[shape][dir-1],
+		newpos = {x: pos.x+forward*mods[0]+right*mods[1], y: pos.y+forward*mods[2]+right*mods[3] };
 	if (!newpos) throw "Illegal direction "+dir+" for shape "+shape;
 	return _.extend({ykx:this.posToYkx(newpos)},newpos);
 };
@@ -60,6 +38,7 @@ Algol.moveInDir = function(pos,dir,instruction,board){
  */
 Algol.dirRelativeTo = function(dir,relativeto,board){
 	switch((board || {}).shape){
+		case "hex": return [1,2,3,4,5,6,1,2,3,4,5,6][relativeto-2+dir];
 		default: return [1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8][relativeto-2+dir];
 	}
 };
@@ -97,7 +76,24 @@ Algol.ykxToPos = function(ykx){ return {y:Math.floor(ykx/1000),x:ykx%1000,ykx:yk
  * @returns {Object} An aspect object
  */
 Algol.generateBoardSquares = function(board){
-	switch((board || {}).shape){
+	board = board || {};
+	switch(board.shape){
+		case "hex":
+			var coords = _.combine(_.range(1,board.x+1),_.range(1,board.y+1)).filter(function(coord){
+					return (coord[0]+coord[1])%2 === (board.notopleft ? 1 : 0);
+				}),
+				rgb = ["red","green","blue"];
+			return _.reduce(coords,function(memo,coord){
+				var x = coord[0], y = coord[1], ykx = this.posToYkx({x:x,y:y});
+				return _.extend(memo,_.object([ykx],[{
+					x: x,
+					y: y,
+					ykx: ykx,
+					columncolour: rgb[(x+2)%3],
+					uphillcolour: rgb[(Math.floor((x+y)/2)-1)%3],
+					downhillcolour: rgb[(Math.floor((y-x+100002)/2))%3]
+				}]));
+			},{},this);
 		default: return _.reduce(_.range(1,board.x*board.y+1),function(ret,num){
 			var y = Math.floor((num-1)/board.x)+1, x = num-((y-1)*board.x);
 			return _.extend(ret,_.object([this.posToYkx({x:x,y:y})],[{ y: y, x: x, colour: ["white","black"][(x+(y%2))%2] }]));
