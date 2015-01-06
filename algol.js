@@ -21,8 +21,8 @@ var movemods = {
  * @returns {Object} A new position object
  */
 Algol.moveInDir = function(pos,dir,instruction,board){
-	var forward = instruction.forward,
-		right = instruction.right,
+	var forward = instruction.forward||0,
+		right = instruction.right||0,
 		shape = (board||{}).shape||"square",
 		mods = movemods[shape][dir-1],
 		newpos = {x: pos.x+forward*mods[0]+right*mods[1], y: pos.y+forward*mods[2]+right*mods[3] };
@@ -41,6 +41,19 @@ Algol.dirRelativeTo = function(dir,relativeto,board){
 		case "hex": return [1,2,3,4,5,6,1,2,3,4,5,6][relativeto-2+dir];
 		default: return [1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8][relativeto-2+dir];
 	}
+};
+
+/**
+ * @returns {Object} Object of position objects for neighbours
+ */
+Algol.neighbours = function(pos,dirs,board){
+	return _.reduce(dirs,function(ret,dir){
+		var n = this.moveInDir(pos,dir,{forward:1},board);
+		if (!this.outOfBounds(n,board)){
+			ret[n.ykx]=n;
+		}
+		return ret;
+	},{},this);
 };
 
 /**
@@ -118,6 +131,33 @@ Algol.calcPropVal = function(startvalue,changes,step){
 };
 
 
+/**
+ * Calculates startvalues and changes for a single object into a given time state
+ * Used only by calcCollection
+ * @param {Object} startproperties Starting object
+ * @param {Object} changes Per property changes
+ * @param {Number} step Which step to calculate to
+ * @param {String} fname internal shit
+ * @return {Object} Stepstate object
+ */
+Algol.calcObj = function(starts,changes,step,fname){
+	return !changes ? starts : _.reduce(_.union(_.keys(starts||{}),_.keys(changes)),function(memo,key){
+		return _.extend(_.object([key],[this[fname||"calcPropVal"]((starts||{})[key],changes[key],step)]),memo);
+	},{},this);
+};
+
+
+/**
+ * Calculates startvalues and changes for a collection of objects into a given time state
+ * @param {Object} starts Collection of starting objects
+ * @param {Object} changes Collection of per object changes
+ * @param {Number} step Which step to calculate to
+ * @return {Object} Collection of Stepstate object
+ */
+Algol.calcColl = function(starts,changes,step){ return this.calcObj(starts,changes,step,"calcObj");};
+
+
+
 // €€€€€€€€€€€€€€€€€€€€€€€€€€€ G E N E R A T O R   F U N C T I O N S €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
 
 /**
@@ -178,8 +218,13 @@ Algol.walkInDir = function(def,startpos,dir,stops,steps,board){
 /* in progress */
 Algol.floatFromSquareInDir = function(def,pos,dir,distance,stops,steps,board){
 	var to = this.moveInDir(pos,dir,{forward:1},board),
-		stop = this.walkCheck(to,dist+1,def.max,stops,steps,board);
-	return stop ? {FLOATKIND:"floatstop",FLOATSTOPREASON:stop,FLOATDISTANCE:dist+1} : {FLOATKIND:"floatstep",FLOATDISTANCE:dist+1};
+		stop = this.walkCheck(to,distance+1,def.max,stops,steps,board);
+	return stop ? {FLOATKIND:"floatstop",FLOATSTOPREASON:stop,FLOATDISTANCE:distance+1} : {FLOATKIND:"floatstep",FLOATDISTANCE:distance+1};
+};
+
+Algol.floatFromSquare = function(def,pos,dirs,distance,stops,steps,board,ret){
+	ret = ret || {};
+
 };
 
 

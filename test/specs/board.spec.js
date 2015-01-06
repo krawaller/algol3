@@ -1,14 +1,32 @@
+/* jshint jasmine: true */
+
 if (typeof require === 'function' && typeof module === 'object') {
 	var sinon = require('sinon'),
 		jasmineSinon = require('jasmine-sinon'),
 		Algol = require("../../algol.js"),
 		_ = require("../../lodashmixins.js");
 }
-R = function(){ return parseInt(_.uniqueId(),10); };
-RS = function(howmany){ return _.map(_.range(0,howmany),function(){return R();}); };
-SERIES = function(arr){ var i = 0; return function(){ return arr[i++];}; };
+var R = function(){ return parseInt(_.uniqueId(),10); };
+var RS = function(howmany){ return _.map(_.range(0,howmany),function(){return R();}); };
+var SERIES = function(arr){ var i = 0; return function(){ return arr[i++];}; };
 
 describe("the board functions",function(){
+
+	describe("the neighbours func",function(){
+		it("is defined",function(){ expect(typeof Algol.neighbours).toEqual("function"); });
+		describe("when used on square board",function(){
+			var pos = {x:1,y:1},
+				dirs = [1,3,5,7],
+				board = {shape:"square"},
+				res = Algol.neighbours(pos,dirs,board);
+			it("returns correct obj",function(){
+				expect(res).toEqual({
+					1002: {x:2,y:1,ykx:1002},
+					2001: {x:1,y:2,ykx:2001}
+				});
+			});
+		});
+	});
 
 	describe("the moveInDir",function(){
 		it("is defined",function(){ expect(typeof Algol.moveInDir).toEqual("function"); });

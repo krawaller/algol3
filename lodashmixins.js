@@ -12,12 +12,21 @@ _.mixin({
 			default: return arr[index];
 		}
 	},
-	combine: function(arr1,arr2){
-		return _.reduce(arr1,function(memo,i1){
-			return memo.concat(_.map(arr2,function(i2){
-				return [i1,i2];
-			}));
-		},[]);
+	combine: function(){
+		return _.reduce(Array.prototype.slice.call(arguments, 1),function(ret,newarr){
+			return _.reduce(ret,function(memo,oldi){
+				return memo.concat(_.map(newarr,function(newi){
+					return oldi.concat(newi);
+				}));
+			},[]);
+		},_.map(arguments[0],function(i){return [i];}));
+	},
+	extendProp: function(){
+		var obj = arguments[0], propname = arguments[1], sources = Array.prototype.slice.call(arguments, 2),
+			args = [obj[propname]||{}].concat(sources);
+		console.log("ARGS",args);
+		obj[propname] = _.extend.apply(this,[obj[propname]||{}].concat(sources));
+		return obj;
 	}
 });
 

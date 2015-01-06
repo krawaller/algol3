@@ -1,12 +1,14 @@
+/* jshint jasmine: true */
+
 if (typeof require === 'function' && typeof module === 'object') {
 	var sinon = require('sinon'),
 		jasmineSinon = require('jasmine-sinon'),
 		Algol = require("../../algol.js"),
 		_ = require("../../lodashmixins.js");
 }
-R = function(){ return parseInt(_.uniqueId(),10); };
-RS = function(howmany){ return _.map(_.range(0,howmany),function(){return R();}); };
-SERIES = function(arr){ var i = 0; return function(){ return arr[i++];}; };
+var R = function(){ return parseInt(_.uniqueId(),10); };
+var RS = function(howmany){ return _.map(_.range(0,howmany),function(){return R();}); };
+var SERIES = function(arr){ var i = 0; return function(){ return arr[i++];}; };
 
 describe("the generator functions",function(){
 	describe("the offsetindirs function",function(){
@@ -14,7 +16,6 @@ describe("the generator functions",function(){
 		describe("when called",function(){
 			var dirs = RS(2),
 				startpos = R(),
-				newpos = R(),
 				movedpos = RS(2),
 				ykx = R(),
 				board = R(),
