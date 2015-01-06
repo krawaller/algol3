@@ -27,18 +27,19 @@
 		"mydaggers": ["FILTER","myunits",{"type":["IS","dagger"]}],
 		"oppcrowns": ["FILTER","oppunits",{"type":["IS","crown"]}],
 		"opponentbase": ["FILTER","TERRAIN",{"type":["IS","base"],"plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
-		"killedoppcrown": ["FILTER","oppunits",{"type":["IS","crown"],"status":["IS","dead"]}],
-		"infiltrators": ["OVERLAP","myunits","opponentbase"],
+		"killedoppcrown": ["FILTER","DEADUNITS",{"type":["IS","crown"],"plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
+		"infiltrators": ["MERGE","myunits","opponentbase",{"id":"id"},{}],
 		"moves": ["FILTER","movetarget",{"id":["IS",["LOOKUP","myunits","selectunit","id"]]}],
 		"kills": ["FILTER","killtarget",{"id":["IS",["LOOKUP","myunits","selectunit","id"]]}]
 	},
 	"endturn": {
 		"condition":["SAME",["TURNVAR","mademove"],true],
+		"commandcap": true,
 		"passto": ["IFELSE",["SAME",["TURNVAR","CURRENTPLAYER"],1],2,1]
 	},
 	"endgameconditions": {
-		"infiltration":["infiltrators",["TURNVAR","CURRENTPLAYER"]],
-		"kingkill":["killedoppcrown",["TURNVAR","CURRENTPLAYER"]]
+		"infiltration":[["NOTEMPTY","infiltrators"],["TURNVAR","CURRENTPLAYER"]],
+		"kingkill":[["NOTEMPTY","killedoppcrown"],["TURNVAR","CURRENTPLAYER"]]
 	},
 	"marks": {
 		"selectunit": "myunits",
@@ -47,17 +48,15 @@
 	},
 	"commands": {
 		"move": {
-			"require": ["selectunit","selectmovetarget"],
 			"effects": [
-				["CHANGEUNITPOSITION",["LOOKUP","myunits","selectunit","id"],"selectmovetarget"],
+				["MOVEUNIT",["LOOKUP","myunits","selectunit","id"],"selectmovetarget"],
 				["SETTURNVARIABLE","mademove",true]
 			]
 		},
 		"kill": {
-			"require": ["selectunit","selectkilltarget"],
 			"effects":[
-				["CHANGEUNITPOSITION",["LOOKUP","myunits","selectunit","id"],"selectmovetarget"],
-				["CHANGEUNITVARIABLE",["LOOKUP","oppunits","selectkilltarget","id"],"status","dead"],
+				["MOVEUNIT",["LOOKUP","myunits","selectunit","id"],"selectmovetarget"],
+				["KILLUNIT",["LOOKUP","oppunits","selectkilltarget","id"]],
 				["SETTURNVARIABLE","mademove",true]
 			]
 		}
@@ -75,11 +74,13 @@
 			"type": "offset",
 			"from": "mydaggers",
 			"dirs": [8,1,2],
-			"forward": 1,
-			"name": ["IFELSE",["ANYAT","oppunits","TARGET"],
-				["IF",["OR",["ANYAT","oppcrowns","TARGET"],["ONEOF",["ARTIFACT","dir"],[8,2]]],"killtarget"],
-				["IFNOT",["ANYAT","myunits","TARGET"],"movetarget"]
-			],
+			"instructions": [{
+				"forward": 1,
+				"name": ["IFELSE",["ANYAT","oppunits","TARGET"],
+					["IF",["OR",["ANYAT","oppcrowns","TARGET"],["ONEOF",["ARTIFACT","dir"],[8,2]]],"killtarget"],
+					["IFNOT",["ANYAT","myunits","TARGET"],"movetarget"]
+				]
+			}],
 			"include": {"id":["LOOKUP","mycrowns","START","id"]}
 		},
 		"belowdagger": {

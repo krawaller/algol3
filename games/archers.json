@@ -1,0 +1,112 @@
+{
+	"source": "http://www.di.fc.ul.pt/~jpn/gv/Archers.pdf",
+	"boards": {
+		"standard": {
+			"shape": "square",
+			"height": 9,
+			"width": 9,
+			"terrain": [
+				{"x":2,"y":2,"type":"base","plr":1},{"x":3,"y":2,"type":"base","plr":1},{"x":4,"y":2,"type":"base","plr":1},
+				{"x":2,"y":3,"type":"base","plr":1},{"x":3,"y":3,"type":"base","plr":1},{"x":4,"y":3,"type":"base","plr":1},
+				{"x":2,"y":4,"type":"base","plr":1},{"x":3,"y":4,"type":"base","plr":1},{"x":4,"y":4,"type":"base","plr":1},
+				{"x":6,"y":6,"type":"base","plr":2},{"x":7,"y":6,"type":"base","plr":2},{"x":8,"y":6,"type":"base","plr":2},
+				{"x":6,"y":7,"type":"base","plr":2},{"x":7,"y":7,"type":"base","plr":2},{"x":8,"y":7,"type":"base","plr":2},
+				{"x":6,"y":8,"type":"base","plr":2},{"x":7,"y":8,"type":"base","plr":2},{"x":8,"y":8,"type":"base","plr":2}
+			]
+		}
+	},
+	"setups": {
+		"standard": [
+			{"x":2,"y":2,"type":"archer","plr":1},{"x":3,"y":2,"type":"archer","plr":1},{"x":4,"y":2,"type":"archer","plr":1},
+			{"x":2,"y":3,"type":"archer","plr":1},{"x":3,"y":3,"type":"king","plr":1},{"x":4,"y":3,"type":"archer","plr":1},
+			{"x":2,"y":4,"type":"archer","plr":1},{"x":3,"y":4,"type":"archer","plr":1},{"x":4,"y":4,"type":"archer","plr":1},
+			{"x":6,"y":6,"type":"archer","plr":2},{"x":7,"y":6,"type":"archer","plr":2},{"x":8,"y":6,"type":"archer","plr":2},
+			{"x":6,"y":7,"type":"archer","plr":2},{"x":7,"y":7,"type":"king","plr":2},{"x":8,"y":7,"type":"archer","plr":2},
+			{"x":6,"y":8,"type":"archer","plr":2},{"x":7,"y":8,"type":"archer","plr":2},{"x":8,"y":8,"type":"archer","plr":2}
+		],
+		"nokings": [
+			{"x":2,"y":2,"type":"archer","plr":1},{"x":3,"y":2,"type":"archer","plr":1},{"x":4,"y":2,"type":"archer","plr":1},
+			{"x":2,"y":3,"type":"archer","plr":1},{"x":3,"y":3,"type":"archer","plr":1},{"x":4,"y":3,"type":"archer","plr":1},
+			{"x":2,"y":4,"type":"archer","plr":1},{"x":3,"y":4,"type":"archer","plr":1},{"x":4,"y":4,"type":"archer","plr":1},
+			{"x":6,"y":6,"type":"archer","plr":2},{"x":7,"y":6,"type":"archer","plr":2},{"x":8,"y":6,"type":"archer","plr":2},
+			{"x":6,"y":7,"type":"archer","plr":2},{"x":7,"y":7,"type":"archer","plr":2},{"x":8,"y":7,"type":"archer","plr":2},
+			{"x":6,"y":8,"type":"archer","plr":2},{"x":7,"y":8,"type":"archer","plr":2},{"x":8,"y":8,"type":"archer","plr":2}
+		]
+	},
+	"queries": {
+		"myunits": ["FILTER","UNITS",{"plr":["IS",["TURNVAR","CURRENTPLAYER"]]}],
+		"oppunits": ["FILTER","UNITS",{"plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
+		"opptargets": ["MERGE","oppunits","bullseye",{"id":"targetid"},{"id":"shooterid"}],
+		"opponentbase": ["FILTER","TERRAIN",{"type":["IS","base"],"plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
+		"killedoppking": ["FILTER","DEADUNITS",{"type":["IS","king"],"plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
+		"infiltrators": ["MERGE","myunits","opponentbase",{"id":"id"},{}]
+	},
+	"generators": {
+		"arrows": {
+			"type": "walker",
+			"from": "UNITS",
+			"dirs": [["LOOKUP","UNITS","START","dir"]],
+			"stops": "UNITS",
+			"max": 3,
+			"stepname": ["IFELSE",["SAME",["ARTIFACT","plr"],["TURN","CURRENTPLAYER"]],"myarrows","opparrows"],
+			"stopname": ["IF",["AND",["ANYAT","UNITS","TARGET"],["NOT",["SAME",["LOOKUP","UNITS","TARGET","plr"]],["LOOKUP","UNITS","START","plr"]]],"bullseye"],
+			"include": ["LOOKUPALL","UNITS","START",["id","plr"]]
+		},
+		"footing": {
+			"type": "offset",
+			"from": "myunits",
+			"dirs": [["LOOKUP","UNITS","START","dir"]],
+			"instructions": [
+				{"forward": 1,"name": ["IF",["NOT",["ANYAT","UNITS","TARGET"]],"forwardfooting"]},
+				{"forward": -1,"name": ["IF",["NOT",["ANYAT","UNITS","TARGET"]],"backwardfooting"]}
+			],
+			"include": {"id":["LOOKUP","UNITS","START","id"]}
+		}
+	},
+	"marks": {
+		"selectunit": "myunits"
+	},
+	"endturn": {
+		"condition":["SAME",["TURNVAR","moves"],2],
+		"commandcap": true,
+		"passto": ["IFELSE",["SAME",["TURNVAR","CURRENTPLAYER"],1],2,1]
+	},
+	"endgameconditions": {
+		"infiltration":[["NOTEMPTY","infiltrators"],["TURNVAR","CURRENTPLAYER"]],
+		"kingkill":[["NOTEMPTY","killedoppking"],["TURNVAR","CURRENTPLAYER"]]
+	},
+	"commands": {
+		"stepforward": {
+			"condition": ["MATCHAT","forwardfooting",["OFFSET","selectunit",["LOOKUP","UNITS","selectunit","dir"],{"forward":1}],{"id":["IS",["LOOKUP","UNITS","selectunit","id"]]}],
+			"effects": [
+				["MOVEUNIT",["LOOKUP","myunits","selectunit","id"],["OFFSET","selectunit",["LOOKUP","UNITS","selectunit","dir"],{"forward":1}]],
+				["SETTURNVARIABLE","moves",["SUM",["TURNVAR","moves"],1]],
+				["SETTURNVARIABLE",["LOOKUP","myunits","selectunit","id"],true]
+			]
+		},
+		"stepbackward": {
+			"condition": ["MATCHAT","backwardfooting",["OFFSET","selectunit",["LOOKUP","UNITS","selectunit","dir"],{"forward":-1}],{"id":["IS",["LOOKUP","UNITS","selectunit","id"]]}],
+			"effects": [
+				["MOVEUNIT",["LOOKUP","myunits","selectunit","id"],["OFFSET","selectunit",["LOOKUP","UNITS","selectunit","dir"],{"forward":-1}]],
+				["SETTURNVARIABLE","moves",["SUM",["TURNVAR","moves"],1]],
+				["SETTURNVARIABLE",["LOOKUP","myunits","selectunit","id"],true]
+			]
+		},
+		"turnleft": {
+			"effects": [["CHANGEUNITVARIABLE","dir",["TURN",["LOOKUP","UNITS","selectunit","dir"],-1]]]
+		},
+		"turnright": {
+			"effects": [["CHANGEUNITVARIABLE","dir",["TURN",["LOOKUP","UNITS","selectunit","dir"],1]]]
+		},
+		"fire": {
+			"conditions": [
+				["FIND","optargets",{"shooterid":["LOOKUP","UNITS","selectunit","id"]}],
+				["NOT",["SAME",["TURN",["LOOKUP","myunits","selectunit","id"],true]]]
+			],
+			"effects": [
+				["KILLUNIT",["LOOKUP","oppunits",["FIND","optargets",{"shooterid":["LOOKUP","UNITS","selectunit","id"]}],"id"]],
+				["SETTURNVARIABLE",["LOOKUP","UNITS","selectunit","id"],true]
+			]
+		}
+	}
+}
