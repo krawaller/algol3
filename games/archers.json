@@ -34,33 +34,34 @@
 		]
 	},
 	"queries": {
-		"myunits": ["FILTER","UNITS",{"plr":["IS",["TURNVAR","CURRENTPLAYER"]]}],
+		"myunits": ["FILTER","UNITS",{"plr":["TURNVAR","CURRENTPLAYER"]}],
 		"oppunits": ["FILTER","UNITS",{"plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
-		"opptargets": ["MERGE","oppunits","bullseye",{"id":"targetid"},{"id":"shooterid"}],
-		"opponentbase": ["FILTER","TERRAIN",{"type":["IS","base"],"plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
-		"killedoppking": ["FILTER","DEADUNITS",{"type":["IS","king"],"plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
-		"infiltrators": ["MERGE","myunits","opponentbase",{"id":"id"},{}]
+		"opptargets": ["MERGE","oppunits",{"id":"targetid"},"bullseye",{"id":"shooterid"}],
+		"opponentbase": ["FILTER","TERRAIN",{"type":"base","plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
+		"killedoppking": ["FILTER","DEADUNITS",{"type":"king","plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
+		"infiltrators": ["MERGE","myunits",{"id":"id"},"opponentbase",{}],
+		"gonnakill": ["FILTER","optargets",{"shooterid":["IDAT","selectunit"]}]
 	},
 	"generators": {
 		"arrows": {
 			"type": "walker",
 			"from": "UNITS",
-			"dirs": [["LOOKUP","UNITS","START","dir"]],
+			"dirs": [1],
+			"relativeto": ["DIRAT","START"],
 			"stops": "UNITS",
 			"max": 3,
 			"stepname": ["IFELSE",["SAME",["ARTIFACT","plr"],["TURN","CURRENTPLAYER"]],"myarrows","opparrows"],
-			"stopname": ["IF",["AND",["ANYAT","UNITS","TARGET"],["NOT",["SAME",["LOOKUP","UNITS","TARGET","plr"]],["LOOKUP","UNITS","START","plr"]]],"bullseye"],
+			"stopname": ["IF",["AND",["ANYAT","UNITS","TARGET"],["DIFFERENT",["LOOKUP","UNITS","TARGET","plr"],["LOOKUP","UNITS","START","plr"]]],"bullseye"],
 			"include": ["LOOKUPALL","UNITS","START",["id","plr"]]
 		},
 		"footing": {
 			"type": "offset",
 			"from": "myunits",
-			"dirs": [["LOOKUP","UNITS","START","dir"]],
-			"instructions": [
-				{"forward": 1,"name": ["IF",["NOT",["ANYAT","UNITS","TARGET"]],"forwardfooting"]},
-				{"forward": -1,"name": ["IF",["NOT",["ANYAT","UNITS","TARGET"]],"backwardfooting"]}
-			],
-			"include": {"id":["LOOKUP","UNITS","START","id"]}
+			"dirs": [1,5],
+			"relativeto": ["DIRAT","START"],
+			"forward": 1,
+			"name": ["IF",["NONEAT","UNITS","TARGET"],["IFELSE",["SAME",["ARTIFACT","originaldir"],1],"forwardfooting","backwardfooting"]],
+			"include": {"id":["IDAT","START"]}
 		}
 	},
 	"marks": {
@@ -77,35 +78,41 @@
 	},
 	"commands": {
 		"stepforward": {
-			"condition": ["MATCHAT","forwardfooting",["OFFSET","selectunit",["LOOKUP","UNITS","selectunit","dir"],{"forward":1}],{"id":["IS",["LOOKUP","UNITS","selectunit","id"]]}],
+			"condition": ["MATCHAT","forwardfooting",["OFFSET","selectunit",["DIRAT","selectunit"],{"forward":1}],{"id":["IDAT","selectunit"]}],
 			"effects": [
-				["MOVEUNIT",["LOOKUP","myunits","selectunit","id"],["OFFSET","selectunit",["LOOKUP","UNITS","selectunit","dir"],{"forward":1}]],
+				["MOVEUNIT",["IDAT","selectunit"],["OFFSET","selectunit",["DIRAT","selectunit"],{"forward":1}]],
 				["SETTURNVARIABLE","moves",["SUM",["TURNVAR","moves"],1]],
-				["SETTURNVARIABLE",["LOOKUP","myunits","selectunit","id"],true]
+				["SETUNITTURNVAR",["IDAT","selectunit"],"moved",true]
 			]
 		},
 		"stepbackward": {
-			"condition": ["MATCHAT","backwardfooting",["OFFSET","selectunit",["LOOKUP","UNITS","selectunit","dir"],{"forward":-1}],{"id":["IS",["LOOKUP","UNITS","selectunit","id"]]}],
+			"condition": ["MATCHAT","backwardfooting",["OFFSET","selectunit",["DIRAT","selectunit"],{"forward":-1}],{"id":["IDAT","selectunit"]}],
 			"effects": [
-				["MOVEUNIT",["LOOKUP","myunits","selectunit","id"],["OFFSET","selectunit",["LOOKUP","UNITS","selectunit","dir"],{"forward":-1}]],
+				["MOVEUNIT",["IDAT","selectunit"],["OFFSET","selectunit",["DIRAT","selectunit"],{"forward":-1}]],
 				["SETTURNVARIABLE","moves",["SUM",["TURNVAR","moves"],1]],
-				["SETTURNVARIABLE",["LOOKUP","myunits","selectunit","id"],true]
+				["SETUNITTURNVAR",["IDAT","selectunit"],"moved",true]
 			]
 		},
 		"turnleft": {
-			"effects": [["CHANGEUNITVARIABLE","dir",["TURN",["LOOKUP","UNITS","selectunit","dir"],-1]]]
+			"effects": [
+				["SETUNITVARIABLE",["IDAT","selectunit"],"dir",["TURN",["DIRAT","selectunit"],-1]],
+				["SETTURNVARIABLE","moves",["SUM",["TURNVAR","moves"],1]]
+			]
 		},
 		"turnright": {
-			"effects": [["CHANGEUNITVARIABLE","dir",["TURN",["LOOKUP","UNITS","selectunit","dir"],1]]]
+			"effects": [
+				["SETUNITVARIABLE",["IDAT","selectunit"],"dir",["TURN",["DIRAT","selectunit"],1]],
+				["SETTURNVARIABLE","moves",["SUM",["TURNVAR","moves"],1]]
+			]
 		},
 		"fire": {
 			"conditions": [
-				["FIND","optargets",{"shooterid":["LOOKUP","UNITS","selectunit","id"]}],
-				["NOT",["SAME",["TURN",["LOOKUP","myunits","selectunit","id"],true]]]
+				["NOTEMPTY","gonnakill"],
+				["DIFFERENT",["UNITTURN",["IDAT","selectunit"],"moved",true]]
 			],
 			"effects": [
-				["KILLUNIT",["LOOKUP","oppunits",["FIND","optargets",{"shooterid":["LOOKUP","UNITS","selectunit","id"]}],"id"]],
-				["SETTURNVARIABLE",["LOOKUP","UNITS","selectunit","id"],true]
+				["KILLUNIT",["LOOKUP","gonnakill",["ONLYIN","gonnakill"],"targetid"]],
+				["SETUNITTURNVAR",["IDAT","selectunit"],"moved",true]
 			]
 		}
 	}

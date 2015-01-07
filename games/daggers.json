@@ -21,16 +21,16 @@
 		]
 	},
 	"queries": {
-		"myunits": ["FILTER","UNITS",{"plr":["IS",["TURNVAR","CURRENTPLAYER"]]}],
+		"myunits": ["FILTER","UNITS",{"plr":["TURNVAR","CURRENTPLAYER"]}],
 		"oppunits": ["FILTER","UNITS",{"plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
-		"mycrowns": ["FILTER","myunits",{"type":["IS","crown"]}],
-		"mydaggers": ["FILTER","myunits",{"type":["IS","dagger"]}],
-		"oppcrowns": ["FILTER","oppunits",{"type":["IS","crown"]}],
-		"opponentbase": ["FILTER","TERRAIN",{"type":["IS","base"],"plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
-		"killedoppcrown": ["FILTER","DEADUNITS",{"type":["IS","crown"],"plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
-		"infiltrators": ["MERGE","myunits","opponentbase",{"id":"id"},{}],
-		"moves": ["FILTER","movetarget",{"id":["IS",["LOOKUP","myunits","selectunit","id"]]}],
-		"kills": ["FILTER","killtarget",{"id":["IS",["LOOKUP","myunits","selectunit","id"]]}]
+		"mycrowns": ["FILTER","myunits",{"type":"crown"}],
+		"mydaggers": ["FILTER","myunits",{"type":"dagger"}],
+		"oppcrowns": ["FILTER","oppunits",{"type":"crown"}],
+		"opponentbase": ["FILTER","TERRAIN",{"type":"base","plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
+		"killedoppcrown": ["FILTER","DEADUNITS",{"type":"crown","plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
+		"infiltrators": ["MERGE","myunits",{"id":"id"},"opponentbase",{}],
+		"moves": ["FILTER","movetarget",{"id":["IDAT","selectunit"]}],
+		"kills": ["FILTER","killtarget",{"id":["IDAT","selectunit"]}]
 	},
 	"endturn": {
 		"condition":["SAME",["TURNVAR","mademove"],true],
@@ -49,14 +49,14 @@
 	"commands": {
 		"move": {
 			"effects": [
-				["MOVEUNIT",["LOOKUP","myunits","selectunit","id"],"selectmovetarget"],
+				["MOVEUNIT",["IDAT","selectunit"],"selectmovetarget"],
 				["SETTURNVARIABLE","mademove",true]
 			]
 		},
 		"kill": {
 			"effects":[
-				["MOVEUNIT",["LOOKUP","myunits","selectunit","id"],"selectmovetarget"],
-				["KILLUNIT",["LOOKUP","oppunits","selectkilltarget","id"]],
+				["MOVEUNIT",["IDAT","selectunit"],"selectmovetarget"],
+				["KILLUNIT",["IDAT","selectkilltarget"]],
 				["SETTURNVARIABLE","mademove",true]
 			]
 		}
@@ -67,21 +67,19 @@
 			"from": "mycrowns",
 			"dirs": [1,2,3,4,5,6,7,8],
 			"forward": 1,
-			"name": ["IFELSE",["ANYAT","oppunits","TARGET"],"killtarget",["IFNOT",["ANYAT","myunits","TARGET"],"movetarget"]],
-			"include": {"id":["LOOKUP","mycrowns","START","id"]}
+			"name": ["IFELSE",["ANYAT","oppunits","TARGET"],"killtarget",["UNLESS",["ANYAT","myunits","TARGET"],"movetarget"]],
+			"include": {"id":["IDAT","START"]}
 		},
 		"abovedagger": {
 			"type": "offset",
 			"from": "mydaggers",
 			"dirs": [8,1,2],
-			"instructions": [{
-				"forward": 1,
-				"name": ["IFELSE",["ANYAT","oppunits","TARGET"],
-					["IF",["OR",["ANYAT","oppcrowns","TARGET"],["ONEOF",["ARTIFACT","dir"],[8,2]]],"killtarget"],
-					["IFNOT",["ANYAT","myunits","TARGET"],"movetarget"]
-				]
-			}],
-			"include": {"id":["LOOKUP","mycrowns","START","id"]}
+			"forward": 1,
+			"name": ["IFELSE",["ANYAT","oppunits","TARGET"],
+				["IF",["OR",["ANYAT","oppcrowns","TARGET"],["ONEOF",["ARTIFACT","dir"],[8,2]]],"killtarget"],
+				["UNLESS",["ANYAT","myunits","TARGET"],"movetarget"]
+			],
+			"include": {"id":["IDAT","START"]}
 		},
 		"belowdagger": {
 			"type": "walker",
@@ -90,7 +88,7 @@
 			"stops": "UNITS",
 			"stepname": "movetarget",
 			"stopname":  ["IF",["OR",["ANYAT","oppcrowns","TARGET"],["AND",["ANYAT","oppunits","TARGET"],["ONEOF",["ARTIFACT","dir"],[4,6]]]],"killtarget"],
-			"include": {"id":["LOOKUP","mycrowns","START","id"]}
+			"include": {"id":["IDAT","START"]}
 		}
 	}
 }
