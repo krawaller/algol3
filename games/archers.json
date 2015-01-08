@@ -34,29 +34,27 @@
 		]
 	},
 	"queries": {
-		"myunits": ["FILTER","UNITS",{"plr":["TURNVAR","CURRENTPLAYER"]}],
-		"oppunits": ["FILTER","UNITS",{"plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
-		"opptargets": ["MERGE","oppunits",{"id":"targetid"},"bullseye",{"id":"shooterid"}],
+		"opptargets": ["MERGE","OPPUNITS",{"id":"targetid"},"bullseye",{"id":"shooterid"}],
 		"opponentbase": ["FILTER","TERRAIN",{"type":"base","plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
 		"killedoppking": ["FILTER","DEADUNITS",{"type":"king","plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
-		"infiltrators": ["MERGE","myunits",{"id":"id"},"opponentbase",{}],
-		"gonnakill": ["FILTER","optargets",{"shooterid":["IDAT","selectunit"]}]
+		"infiltrators": ["MERGE","MYUNITS",{"id":"id"},"opponentbase",{}],
+		"gonnakill": ["FILTER","opptargets",{"shooterid":["IDAT","selectunit"]}]
 	},
 	"generators": {
 		"arrows": {
 			"type": "walker",
-			"from": "UNITS",
+			"fromquery": "UNITS",
 			"dirs": [1],
 			"relativeto": ["DIRAT","START"],
 			"stops": "UNITS",
 			"max": 3,
-			"stepname": ["IFELSE",["SAME",["ARTIFACT","plr"],["TURN","CURRENTPLAYER"]],"myarrows","opparrows"],
+			"stepname": ["IFELSE",["SAME",["LOOKUP","UNITS","START","plr"],["TURNVAR","CURRENTPLAYER"]],"myarrows","opparrows"],
 			"stopname": ["IF",["AND",["ANYAT","UNITS","TARGET"],["DIFFERENT",["LOOKUP","UNITS","TARGET","plr"],["LOOKUP","UNITS","START","plr"]]],"bullseye"],
 			"include": ["LOOKUPALL","UNITS","START",["id","plr"]]
 		},
 		"footing": {
 			"type": "offset",
-			"from": "myunits",
+			"frompos": "selectunit",
 			"dirs": [1,5],
 			"relativeto": ["DIRAT","START"],
 			"forward": 1,
@@ -65,51 +63,48 @@
 		}
 	},
 	"marks": {
-		"selectunit": "myunits"
+		"selectunit": "MYUNITS"
 	},
 	"endturn": {
 		"condition":["SAME",["TURNVAR","moves"],2],
 		"commandcap": true,
 		"passto": ["IFELSE",["SAME",["TURNVAR","CURRENTPLAYER"],1],2,1]
 	},
-	"endgameconditions": {
+	"endgame": {
 		"infiltration":[["NOTEMPTY","infiltrators"],["TURNVAR","CURRENTPLAYER"]],
 		"kingkill":[["NOTEMPTY","killedoppking"],["TURNVAR","CURRENTPLAYER"]]
 	},
 	"commands": {
 		"stepforward": {
-			"condition": ["MATCHAT","forwardfooting",["OFFSET","selectunit",["DIRAT","selectunit"],{"forward":1}],{"id":["IDAT","selectunit"]}],
+			"condition": ["NOTEMPTY","forwardfooting"],
 			"effects": [
-				["MOVEUNIT",["IDAT","selectunit"],["OFFSET","selectunit",["DIRAT","selectunit"],{"forward":1}]],
-				["SETTURNVARIABLE","moves",["SUM",["TURNVAR","moves"],1]],
+				["MOVEUNIT",["IDAT","selectunit"],["ONLYIN","forwardfooting"]],
+				["SETTURNVAR","moves",["SUM",["TURNVAR","moves"],1]],
 				["SETUNITTURNVAR",["IDAT","selectunit"],"moved",true]
 			]
 		},
 		"stepbackward": {
-			"condition": ["MATCHAT","backwardfooting",["OFFSET","selectunit",["DIRAT","selectunit"],{"forward":-1}],{"id":["IDAT","selectunit"]}],
+			"condition": ["NOTEMPTY","backwardfooting"],
 			"effects": [
-				["MOVEUNIT",["IDAT","selectunit"],["OFFSET","selectunit",["DIRAT","selectunit"],{"forward":-1}]],
-				["SETTURNVARIABLE","moves",["SUM",["TURNVAR","moves"],1]],
+				["MOVEUNIT",["IDAT","selectunit"],["ONLYIN","backwardfooting"]],
+				["SETTURNVAR","moves",["SUM",["TURNVAR","moves"],1]],
 				["SETUNITTURNVAR",["IDAT","selectunit"],"moved",true]
 			]
 		},
 		"turnleft": {
 			"effects": [
-				["SETUNITVARIABLE",["IDAT","selectunit"],"dir",["TURN",["DIRAT","selectunit"],-1]],
-				["SETTURNVARIABLE","moves",["SUM",["TURNVAR","moves"],1]]
+				["SETUNITVAR",["IDAT","selectunit"],"dir",["TURN",["DIRAT","selectunit"],-1]],
+				["SETTURNVAR","moves",["SUM",["TURNVAR","moves"],1]]
 			]
 		},
 		"turnright": {
 			"effects": [
-				["SETUNITVARIABLE",["IDAT","selectunit"],"dir",["TURN",["DIRAT","selectunit"],1]],
-				["SETTURNVARIABLE","moves",["SUM",["TURNVAR","moves"],1]]
+				["SETUNITVAR",["IDAT","selectunit"],"dir",["TURN",["DIRAT","selectunit"],1]],
+				["SETTURNVAR","moves",["SUM",["TURNVAR","moves"],1]]
 			]
 		},
 		"fire": {
-			"conditions": [
-				["NOTEMPTY","gonnakill"],
-				["DIFFERENT",["UNITTURN",["IDAT","selectunit"],"moved",true]]
-			],
+			"condition": ["AND",["NOTEMPTY","gonnakill"],["DIFFERENT",["UNITTURNVAR",["IDAT","selectunit"],"moved"],true]],
 			"effects": [
 				["KILLUNIT",["LOOKUP","gonnakill",["ONLYIN","gonnakill"],"targetid"]],
 				["SETUNITTURNVAR",["IDAT","selectunit"],"moved",true]

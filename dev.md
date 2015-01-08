@@ -2,9 +2,15 @@
 
 // ################## D A T A   T Y P E S ##################
 
+"MYUNITS": 
+"OPPUNITS": 
+
 query
-	UNITS
-	DEADUNITS
+	ALLUNITS
+	UNITS // ["FILTER","ALLUNITS",{"status":["ISNT","dead"]}]
+	MYUNITS  // ["FILTER","UNITS",{"plr":["TURNVAR","CURRENTPLAYER"]}],
+	OPPUNITS // ["FILTER","UNITS",{"plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
+	DEADUNITS // ["FILTER","ALLUNITS",{"status":"dead"}],
 	TERRAIN
 	LOCATIONS
 	<generatedname>
@@ -20,6 +26,9 @@ stealobj
 matchobj
 	{propname:propmatcher,...}
 
+propobj
+	{propname:value,...}
+
 propmatcher
 	ISNT(value)
 	value
@@ -28,6 +37,7 @@ position
 	<markname>
 	OFFSET(position,direction,instruction)
 	ONLYIN(query)
+	TURNPOS(name)
 	START //in generator
 	TARGET //in generator
 
@@ -76,11 +86,21 @@ dir
 effect
 	MOVEUNIT(id,position)
 	KILLUNIT(id)
-	SETUNITVARIABLE(id,value)
+	TURNUNIT(id,turns)
+	SETUNITVAR(id,value)
+	SETUNITTURNVAR(id,name,value)
+	SETTURNVAR(name,value)
+	SETTURNPOS(name,position)
+	CREATETERRAIN(position,propobj)
 
 
 
 
+// ################## A N A L Y S I S ##################
+
+Want: 
+	queried TURNVAR, TURNPOSVAR, UNITTURNVAR
+	set TURNVAR, TURNPOSVAR, UNITTURNVAR
 
 
 
@@ -88,10 +108,11 @@ effect
 // ################## G A M E S   T O   A D D ##################
 
 	Pikemen
-	Amazons
 	Nine men morris
 	Mastery
 	Realms
 	Tablut
 	Taifho
 	Trespass
+	Diaballik
+	sombrero (http://www.di.fc.ul.pt/~jpn/gv/sombrero.htm)

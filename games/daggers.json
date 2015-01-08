@@ -21,14 +21,12 @@
 		]
 	},
 	"queries": {
-		"myunits": ["FILTER","UNITS",{"plr":["TURNVAR","CURRENTPLAYER"]}],
-		"oppunits": ["FILTER","UNITS",{"plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
-		"mycrowns": ["FILTER","myunits",{"type":"crown"}],
-		"mydaggers": ["FILTER","myunits",{"type":"dagger"}],
-		"oppcrowns": ["FILTER","oppunits",{"type":"crown"}],
+		"mycrowns": ["FILTER","MYUNITS",{"type":"crown"}],
+		"mydaggers": ["FILTER","MYUNITS",{"type":"dagger"}],
+		"oppcrowns": ["FILTER","OPPUNITS",{"type":"crown"}],
 		"opponentbase": ["FILTER","TERRAIN",{"type":"base","plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
 		"killedoppcrown": ["FILTER","DEADUNITS",{"type":"crown","plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
-		"infiltrators": ["MERGE","myunits",{"id":"id"},"opponentbase",{}],
+		"infiltrators": ["MERGE","MYUNITS",{"id":"id"},"opponentbase",{}],
 		"moves": ["FILTER","movetarget",{"id":["IDAT","selectunit"]}],
 		"kills": ["FILTER","killtarget",{"id":["IDAT","selectunit"]}]
 	},
@@ -37,12 +35,12 @@
 		"commandcap": true,
 		"passto": ["IFELSE",["SAME",["TURNVAR","CURRENTPLAYER"],1],2,1]
 	},
-	"endgameconditions": {
+	"endgame": {
 		"infiltration":[["NOTEMPTY","infiltrators"],["TURNVAR","CURRENTPLAYER"]],
 		"kingkill":[["NOTEMPTY","killedoppcrown"],["TURNVAR","CURRENTPLAYER"]]
 	},
 	"marks": {
-		"selectunit": "myunits",
+		"selectunit": "MYUNITS",
 		"selectmovetarget": "moves",
 		"selectkilltarget": "kills"
 	},
@@ -50,44 +48,44 @@
 		"move": {
 			"effects": [
 				["MOVEUNIT",["IDAT","selectunit"],"selectmovetarget"],
-				["SETTURNVARIABLE","mademove",true]
+				["SETTURNVAR","mademove",true]
 			]
 		},
 		"kill": {
 			"effects":[
 				["MOVEUNIT",["IDAT","selectunit"],"selectmovetarget"],
 				["KILLUNIT",["IDAT","selectkilltarget"]],
-				["SETTURNVARIABLE","mademove",true]
+				["SETTURNVAR","mademove",true]
 			]
 		}
 	},
 	"generators": {
 		"nexttocrown": {
 			"type": "offset",
-			"from": "mycrowns",
+			"fromquery": "mycrowns",
 			"dirs": [1,2,3,4,5,6,7,8],
 			"forward": 1,
-			"name": ["IFELSE",["ANYAT","oppunits","TARGET"],"killtarget",["UNLESS",["ANYAT","myunits","TARGET"],"movetarget"]],
+			"name": ["IFELSE",["ANYAT","OPPUNITS","TARGET"],"killtarget",["UNLESS",["ANYAT","MYUNITS","TARGET"],"movetarget"]],
 			"include": {"id":["IDAT","START"]}
 		},
 		"abovedagger": {
 			"type": "offset",
-			"from": "mydaggers",
+			"fromquery": "mydaggers",
 			"dirs": [8,1,2],
 			"forward": 1,
-			"name": ["IFELSE",["ANYAT","oppunits","TARGET"],
-				["IF",["OR",["ANYAT","oppcrowns","TARGET"],["ONEOF",["ARTIFACT","dir"],[8,2]]],"killtarget"],
-				["UNLESS",["ANYAT","myunits","TARGET"],"movetarget"]
+			"name": ["IFELSE",["ANYAT","OPPUNITS","TARGET"],
+				["IF",["OR",["ANYAT","oppcrowns","TARGET"],["ONEOF",["ARTIFACT","dir"],8,2]],"killtarget"],
+				["UNLESS",["ANYAT","MYUNITS","TARGET"],"movetarget"]
 			],
 			"include": {"id":["IDAT","START"]}
 		},
 		"belowdagger": {
 			"type": "walker",
-			"from": "mydaggers",
+			"fromquery": "mydaggers",
 			"dirs": [4,5,6],
 			"stops": "UNITS",
 			"stepname": "movetarget",
-			"stopname":  ["IF",["OR",["ANYAT","oppcrowns","TARGET"],["AND",["ANYAT","oppunits","TARGET"],["ONEOF",["ARTIFACT","dir"],[4,6]]]],"killtarget"],
+			"stopname":  ["IF",["OR",["ANYAT","oppcrowns","TARGET"],["AND",["ANYAT","OPPUNITS","TARGET"],["ONEOF",["ARTIFACT","dir"],4,6]]],"killtarget"],
 			"include": {"id":["IDAT","START"]}
 		}
 	}
