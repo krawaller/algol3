@@ -33,19 +33,15 @@
 		"blocked":[["EMPTY","enemymove"],["TURNVAR","CURRENTPLAYER"]]
 	},
 	"commands": {
-		"move": {
-			"effects": [
-				["MOVEUNIT",["IDAT","selectunit"],"selectmove"],
-				["SETTURNVAR","moved",true],
-				["SETTURNPOS","movedto","selectunit"]
-			]
-		},
-		"fire": {
-			"effects": [
-				["CREATETERRAIN","selectfire",{"type":"fire"}],
-				["SETTURNVAR","fired",true]
-			]
-		}
+		"move": [
+			["MOVEUNIT",["IDAT","selectunit"],"selectmove"],
+			["SETTURNVAR","moved",true],
+			["SETTURNPOS","movedto","selectunit"]
+		],
+		"fire": [
+			["CREATETERRAIN","selectfire",{"type":"fire"}],
+			["SETTURNVAR","fired",true]
+		]
 	},
 	"generators": {
 		"movetarget": {

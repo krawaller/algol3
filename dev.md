@@ -94,6 +94,34 @@ effect
 	CREATETERRAIN(position,propobj)
 
 
+save
+	game: gamename,
+	board: boardname, // or none
+	setup: setupname, // or none
+	unitchanges:
+		{id:{prop:[step,val,...],...},...}
+	terrainchanges:
+		{id:{prop:[step,val,...],...},...}
+	steps:
+		[[plr,cmnd,[mark,x,y],[mark,x,y],...]]
+	status: ["current"/endgame,who]
+	turn:
+		CURRENTPLAYER: plr
+		var: {}
+		pos: {}
+		unit: {}
+
+battle
+	cache
+
+
+
+// ################# G A M E   F L O W #####################
+
+click on a square
+evaluate a query! (needs dependencies?)
+execute command!
+
 
 
 // ################## A N A L Y S I S ##################
@@ -101,8 +129,6 @@ effect
 Want: 
 	queried TURNVAR, TURNPOSVAR, UNITTURNVAR
 	set TURNVAR, TURNPOSVAR, UNITTURNVAR
-
-
 
 
 // ################## G A M E S   T O   A D D ##################

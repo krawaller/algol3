@@ -91,18 +91,14 @@
 				["SETUNITTURNVAR",["IDAT","selectunit"],"moved",true]
 			]
 		},
-		"turnleft": {
-			"effects": [
-				["SETUNITVAR",["IDAT","selectunit"],"dir",["TURN",["DIRAT","selectunit"],-1]],
-				["SETTURNVAR","moves",["SUM",["TURNVAR","moves"],1]]
-			]
-		},
-		"turnright": {
-			"effects": [
-				["SETUNITVAR",["IDAT","selectunit"],"dir",["TURN",["DIRAT","selectunit"],1]],
-				["SETTURNVAR","moves",["SUM",["TURNVAR","moves"],1]]
-			]
-		},
+		"turnleft": [
+			["SETUNITVAR",["IDAT","selectunit"],"dir",["TURN",["DIRAT","selectunit"],-1]],
+			["SETTURNVAR","moves",["SUM",["TURNVAR","moves"],1]]
+		],
+		"turnright": [
+			["SETUNITVAR",["IDAT","selectunit"],"dir",["TURN",["DIRAT","selectunit"],1]],
+			["SETTURNVAR","moves",["SUM",["TURNVAR","moves"],1]]
+		],
 		"fire": {
 			"condition": ["AND",["NOTEMPTY","gonnakill"],["DIFFERENT",["UNITTURNVAR",["IDAT","selectunit"],"moved"],true]],
 			"effects": [

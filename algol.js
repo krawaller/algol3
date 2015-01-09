@@ -3,6 +3,20 @@
 var Algol = {},
 	_ = (typeof require !== "undefined" ? require("./lodashmixins") : window._);
 
+
+
+// €€€€€€€€€€€€€€€€€€€€€€€€€€€ B A T T L E €€€€€€€€€€€€€€€€€€€€€€€€€€€
+
+Algol.performEffectsOnSave = function(game,save,cache,effects){
+	// needs eval...
+};
+
+Algol.endTurnOnSave = function(game,save,cache){
+	// needs bool eval and shit...
+};
+
+
+
 // €€€€€€€€€€€€€€€€€€€€€€€€€€€ B O A R D  F U N C T I O N S €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€*/
 
 
@@ -227,6 +241,220 @@ Algol.floatFromSquare = function(def,pos,dirs,distance,stops,steps,board,ret){
 
 };
 
+// €€€€€€€€€€€€€€€€€€€€€€€€€€€ A N A L Y Z E R S €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
+
+var jot = function(obj,listname,item){
+	obj[listname] = _.unique((obj[listname]||[]).concat([item]));
+};
+
+Algol.analyze_game = function(def){
+	var rec = {queries:{},generators:{},marks:{}}, ctx = {game:def};
+	_.each(def.queries,function(qdef,qname){
+		this.analyze_querydef(ctx,qdef,(rec.queries[qname]={}));
+	},this);
+	_.each(def.generators,function(gdef,gname){
+		this.analyze_generator(ctx,gdef,(rec.generators[gname]={}));
+	},this);
+	_.each(def.marks,function(mdef,mname){
+		this.analyze_mark(ctx,mdef,(rec.marks[mname]={}));
+	},this);
+	return rec;
+};
+
+Algol.analyze_mark = function(ctx,def,rec){
+	if (!_.isObject(def)) def = {from:def};
+	this.analyze_boolean(ctx,def.condition,rec);
+	this.analyze_queryref(ctx,def.from,rec);
+};
+
+Algol.analyze_querydef = function(ctx,def,rec){
+	switch(def[0]){
+		case "FILTER":
+			jot(rec,"querydeps",def[1]);
+			this.analyze_propobj(ctx,def[2],rec);
+			//_.each(def[2],function(val){ this.analyze_value(ctx,val,rec); },this);
+			break;
+		case "MERGE":
+			jot(rec,"querydeps",def[1]);
+			jot(rec,"querydeps",def[3]);
+			break;
+		default: throw "Unknown querydef: "+def[0];
+	}
+};
+
+Algol.analyze_propobj = function(ctx,def,rec){
+	if (_.isArray(def)){
+		switch(def[0]){
+			case "LOOKUPALL":
+				this.analyze_queryref(ctx,def[1],rec);
+				this.analyze_positionref(ctx,def[2],rec);
+				break;
+			default: throw "Unknown propobjdef: "+def[0];
+		}
+	} else _.each(def,function(val){ this.analyze_value(ctx,val,rec); },this);
+};
+
+Algol.analyze_generator = function(ctx,def,rec){
+	var genctx = _.extend({generatename:true},ctx);
+	_.each({
+		generatornames:["name","stepname","stopname"],
+		positionref: ["frompos"],
+		queryref: ["fromquery","stops","steps"],
+		value: ["name","stepname","stopname"],
+		propobj: ["include"]
+	},function(props,key){
+		_.each(props,function(n){
+			if (def[n]) this["analyze_"+key](genctx,def[n],rec);
+		},this);
+	},this);
+};
+
+Algol.analyze_generatornames = function(ctx,def,rec){
+	if (_.isArray(def)){
+		switch(def[0]){
+			case "IFELSE":
+				this.analyze_generatornames(ctx,def[2],rec);
+				this.analyze_generatornames(ctx,def[3],rec);
+				break;
+			case "IF":
+			case "UNLESS": this.analyze_generatornames(ctx,def[2],rec); break;
+			default: throw "Unknown namegendef: "+JSON.stringify(def);
+		}
+	} else {
+		jot(rec,"generates",def);
+	}
+};
+
+Algol.analyze_command = function(ctx,def,rec){
+	if (_.isArray(def)){
+		switch(def[0]){
+			case "MOVEUNIT":
+				this.analyze_value(ctx,def[1],rec);
+				this.analyze_positionref(ctx,def[2],rec);
+				break;
+			case "KILLUNIT":
+			case "TURNUNIT":
+				this.analyze_value(ctx,def[1],rec);
+				break;
+			
+			default: throw "Unknown namegendef: "+JSON.stringify(def);
+		}
+	}
+};
+
+Algol.analyze_value = function(ctx,def,rec){
+	if (_.isArray(def)){
+		switch(def[0]){
+			case "TURNVAR": jot(rec,"turnvardeps",def[1]); break;
+			case "IDAT": this.analyze_positionref(ctx,def[1],rec); break;
+			case "ISNT": this.analyze_value(ctx,def[1],rec); break;
+			case "IFELSE":
+				this.analyze_boolean(ctx,def[1],rec);
+				this.analyze_value(ctx,def[2],rec);
+				this.analyze_value(ctx,def[3],rec);
+				break;
+			case "LOOKUP":
+				this.analyze_queryref(ctx,def[1],rec);
+				this.analyze_positionref(ctx,def[2],rec);
+				break;
+			case "IF":
+			case "UNLESS":
+				this.analyze_boolean(ctx,def[1],rec);
+				this.analyze_value(ctx,def[2],rec);
+				break;
+			case "ARTIFACT": break;
+			default: throw "Unknown valuedef: "+JSON.stringify(def);
+		}
+	}
+};
+
+Algol.analyze_boolean = function(ctx,def,rec){
+	if (_.isArray(def)){
+		switch(def[0]){
+			case "NOT": this.analyze_boolean(ctx,def[1],rec); break;
+			case "SAME":
+			case "DIFFERENT":
+				this.analyze_value(ctx,def[1],rec);
+				this.analyze_value(ctx,def[2],rec);
+				break;
+			case "ANYAT":
+			case "NONEAT":
+				this.analyze_queryref(ctx,def[1],rec);
+				this.analyze_positionref(ctx,def[2],rec);
+				break;
+			case "EMPTY":
+			case "NOTEMPTY":
+				this.analyze_queryref(ctx,def[1],rec);
+				break;
+			case "MATCHAT":
+				this.analyze_queryref(ctx,def[1],rec);
+				this.analyze_positionref(ctx,def[2],rec);
+				this.analyze_propobj(ctx,def[3],rec);
+				break;
+			case "AND":
+			case "OR":
+				_.each(_.tail(def),function(b){
+					this.analyze_boolean(ctx,b,rec);
+				},this);
+				break;
+			case "ONEOF":
+				_.each(_.tail(def),function(b){
+					this.analyze_value(ctx,b,rec);
+				},this);
+				break;
+			default: throw "Unknown booldef: "+def[0];
+		}
+	}
+};
+
+Algol.analyze_positionref = function(ctx,def,rec){
+	if (_.isArray(def)){
+		switch(def[0]){
+			case "ONLYIN": this.analyze_queryref(ctx,def[1],rec); break;
+			case "TURNPOS": jot(rec,"turnposdeps",def[1]); break;
+			default: throw "Unknown positiondef: "+def[0];
+		}
+	} else if (ctx.game.marks[def]){
+		jot(rec,"markdeps",def);
+	}
+};
+
+Algol.analyze_queryref = function(ctx,def,rec){
+	jot(rec,"querydeps",def);
+};
+
+// --------------------- old analysis
+
+Algol.analyze_generatednames = function(generators){
+	return _.unique(_.flatten(_.reduce(generators,function(ret,gendef){
+		return ret.concat(_.reduce(["name","stepname","stopname"],function(mem,prop){
+			return mem.concat(gendef[prop] ? this.analyze_namesinnamedef(gendef[prop]) : []);
+		},[],this));
+	},[],this)));
+};
+
+Algol.analyze_namesinnamedef = function(ndef){
+	var A = this.analyze_namesinnamedef.bind(this);
+	return ndef[0]==="IFELSE" ? [A(ndef[2]),A(ndef[3])] : _.contains(["IF","UNLESS"],ndef[0]) ? [A(ndef[2])] : [ndef];
+};
+
+Algol.analyze_commandeffects = function(commands){
+	return _.reduce(commands,function(ret,cmnd){
+		return _.reduce(_.isArray(cmnd)?cmnd:cmnd.effects,function(o,effect){
+			return this.analyze_effect(effect,o);
+		},ret,this);
+	},{},this);
+};
+
+Algol.analyze_effect = function(effect,o){
+	switch(effect[0]){
+		case "SETTURNVAR": o.turnvars = _.uniq((o.turnvars||[]).concat(effect[1])); break;
+		case "SETUNITTURNVAR": o.unitturnvars = _.uniq((o.unitturnvars||[]).concat(effect[2])); break;
+		case "SETTURNPOS": o.turnpositions = _.uniq((o.turnpositions||[]).concat(effect[1])); break;
+		case "CREATETERRAIN": o.spawnsterrain = true;
+	}
+	return o;
+};
 
 // €€€€€€€€€€€€€€€€€€€€€€€€€€€ V A L I D A T O R S €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
 
@@ -275,37 +503,6 @@ Algol.validationreporter = function(name){
 	return rep;
 };
 
-Algol.analyze_generatednames = function(generators){
-	return _.unique(_.flatten(_.reduce(generators,function(ret,gendef){
-		return ret.concat(_.reduce(["name","stepname","stopname"],function(mem,prop){
-			return mem.concat(gendef[prop] ? this.analyze_namesinnamedef(gendef[prop]) : []);
-		},[],this));
-	},[],this)));
-};
-
-Algol.analyze_namesinnamedef = function(ndef){
-	var A = this.analyze_namesinnamedef.bind(this);
-	return ndef[0]==="IFELSE" ? [A(ndef[2]),A(ndef[3])] : _.contains(["IF","UNLESS"],ndef[0]) ? [A(ndef[2])] : [ndef];
-};
-
-Algol.analyze_commandeffects = function(commands){
-	return _.reduce(commands,function(ret,cmnd){
-		return _.reduce(_.isArray(cmnd)?cmnd:cmnd.effects,function(o,effect){
-			return this.analyze_effect(effect,o);
-		},ret,this);
-	},{},this);
-};
-
-Algol.analyze_effect = function(effect,o){
-	switch(effect[0]){
-		case "SETTURNVAR": o.turnvars = _.uniq((o.turnvars||[]).concat(effect[1])); break;
-		case "SETUNITTURNVAR": o.unitturnvars = _.uniq((o.unitturnvars||[]).concat(effect[2])); break;
-		case "SETTURNPOS": o.turnpositions = _.uniq((o.turnpositions||[]).concat(effect[1])); break;
-		case "CREATETERRAIN": o.spawnsterrain = true;
-	}
-	return o;
-};
-
 Algol.validate_game = function(report,ctx,def){
 	ctx.game = def;
 	ctx.generatednames = this.analyze_generatednames(def.generators);
@@ -348,7 +545,9 @@ Algol.validate_generatordef = function(report,ctx,def){
 	});
 	report.fixobj(undefined,ctx,def,{
 		frompos: "positionref",
-		fromquery: "queryref"
+		fromquery: "queryref",
+		relativeto: "dir",
+		include: "propobj"
 	},true);
 	report(!_.contains(["walker","offset"],def.type) && "has no valid type!",function(){
 		this["validate_generator_"+def.type](report,ctx,def);
@@ -379,6 +578,8 @@ Algol.validate_customquerydef = function(report,ctx,def){
 	report.cmnd(ctx,def,{
 		FILTER: ["queryref","matchobj"],
 		MERGE: ["queryref","stealobj","queryref","stealobj"]
+	},function(){
+		// TODO - validate propnames and shit in stealobjs
 	});
 };
 
@@ -548,6 +749,16 @@ Algol.validate_turnposqueryname = function(report,ctx,def){
 	report(!_.contains(ctx.commandeffects.turnpositions||[],def) && "asks for turnposition '"+def+"' which is never set");
 };
 
+Algol.validate_unitvarsetname = function(report,ctx,def){
+	report(!_.isString(def) && "uses invalid unitvar name: "+def);
+	report(_.contains(["x","y","status"],def) && "uses reserved unitvar name '"+def+"', use specific effects instead!");
+};
+
+Algol.validate_unitturnvarsetname = function(report,ctx,def){
+	report(!_.isString(def) && "uses invalid unitturnvar name: "+def);
+	report(_.contains(["x","y"],def) && "uses reserved unitturnvar name: "+def);	
+};
+
 Algol.validate_winner = function(report,ctx,def){};
 Algol.validate_intpropname = function(report,ctx,def){};
 Algol.validate_idpropname = function(report,ctx,def){};
@@ -556,8 +767,6 @@ Algol.validate_stealobj = function(report,ctx,def){};
 Algol.validate_propobj = function(report,ctx,def){};
 Algol.validate_unitvarqueryname = function(report,ctx,def){};
 Algol.validate_turnpossetname = function(report,ctx,def){};
-Algol.validate_unitvarsetname = function(report,ctx,def){};
-Algol.validate_unitturnvarsetname = function(report,ctx,def){};
 Algol.validate_turnvarsetname = function(report,ctx,def){};
 Algol.validate_commandname = function(report,ctx,def){};
 Algol.validate_generatorname = function(report,ctx,def){};
@@ -565,7 +774,8 @@ Algol.validate_endgamename = function(report,ctx,def){};
 Algol.validate_customqueryname = function(report,ctx,def){};
 Algol.validate_markname = function(report,ctx,def){};
 
-// €€€€€€€€€€€€€ EXPORTS
+
+// €€€€€€€€€€€€€ E X P O R T €€€€€€€€€€€€€€€€€€€€€€€€€€
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
     module.exports = Algol;

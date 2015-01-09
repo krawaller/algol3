@@ -45,19 +45,15 @@
 		"selectkilltarget": "kills"
 	},
 	"commands": {
-		"move": {
-			"effects": [
-				["MOVEUNIT",["IDAT","selectunit"],"selectmovetarget"],
-				["SETTURNVAR","mademove",true]
-			]
-		},
-		"kill": {
-			"effects":[
-				["MOVEUNIT",["IDAT","selectunit"],"selectmovetarget"],
-				["KILLUNIT",["IDAT","selectkilltarget"]],
-				["SETTURNVAR","mademove",true]
-			]
-		}
+		"move": [
+			["MOVEUNIT",["IDAT","selectunit"],"selectmovetarget"],
+			["SETTURNVAR","mademove",true]
+		],
+		"kill": [
+			["MOVEUNIT",["IDAT","selectunit"],"selectmovetarget"],
+			["KILLUNIT",["IDAT","selectkilltarget"]],
+			["SETTURNVAR","mademove",true]
+		]
 	},
 	"generators": {
 		"nexttocrown": {
