@@ -50,7 +50,7 @@
 			["SETTURNVAR","mademove",true]
 		],
 		"kill": [
-			["MOVEUNIT",["IDAT","selectunit"],"selectmovetarget"],
+			["MOVEUNIT",["IDAT","selectunit"],"selectkilltarget"],
 			["KILLUNIT",["IDAT","selectkilltarget"]],
 			["SETTURNVAR","mademove",true]
 		]

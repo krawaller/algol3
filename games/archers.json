@@ -38,7 +38,8 @@
 		"opponentbase": ["FILTER","TERRAIN",{"type":"base","plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
 		"killedoppking": ["FILTER","DEADUNITS",{"type":"king","plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
 		"infiltrators": ["MERGE","MYUNITS",{"id":"id"},"opponentbase",{}],
-		"gonnakill": ["FILTER","opptargets",{"shooterid":["IDAT","selectunit"]}]
+		"gonnakill": ["FILTER","opptargets",{"shooterid":["IDAT","selectunit"]}],
+		"blocks": ["MERGE","UNITS",{},"opparrows",{}]
 	},
 	"generators": {
 		"arrows": {
@@ -58,7 +59,7 @@
 			"dirs": [1,5],
 			"relativeto": ["DIRAT","START"],
 			"forward": 1,
-			"name": ["IF",["NONEAT","UNITS","TARGET"],["IFELSE",["SAME",["ARTIFACT","originaldir"],1],"forwardfooting","backwardfooting"]],
+			"name": ["IF",["NONEAT","blocks","TARGET"],["IFELSE",["SAME",["ARTIFACT","originaldir"],1],"forwardfooting","backwardfooting"]],
 			"include": {"id":["IDAT","START"]}
 		}
 	},

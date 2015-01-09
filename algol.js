@@ -249,18 +249,10 @@ var jot = function(obj,listname,item){
 
 Algol.analyze_game = function(def){
 	var rec = {queries:{},generators:{},marks:{},commands:{},ids:{}}, ctx = {game:def};
-	_.each(def.queries,function(qdef,qname){
-		this.analyze_querydef(ctx,qdef,(rec.queries[qname]={}));
-	},this);
-	_.each(def.generators,function(gdef,gname){
-		this.analyze_generator(ctx,gdef,(rec.generators[gname]={}));
-	},this);
-	_.each(def.marks,function(mdef,mname){
-		this.analyze_mark(ctx,mdef,(rec.marks[mname]={}));
-	},this);
-	_.each(def.commands,function(cdef,cname){
-		this.analyze_command(ctx,cdef,(rec.commands[cname]={}));
-	},this);
+	_.each(def.queries,function(qdef,qname){ this.analyze_querydef(ctx,qdef,(rec.queries[qname]={})); },this);
+	_.each(def.generators,function(gdef,gname){ this.analyze_generator(ctx,gdef,(rec.generators[gname]={})); },this);
+	_.each(def.marks,function(mdef,mname){ this.analyze_mark(ctx,mdef,(rec.marks[mname]={})); },this);
+	_.each(def.commands,function(cdef,cname){ this.analyze_command(ctx,cdef,(rec.commands[cname]={})); },this);
 	rec.generatednames = _.uniq(_.compact(_.reduce(rec.generators,function(mem,o){ return mem.concat(o.generates); },[])));
 	rec.turnpositions = _.uniq(_.compact(_.reduce(rec.commands,function(mem,o){ return mem.concat(o.setsturnpos); },[])));
 	rec.turnvars = _.uniq(_.compact(_.reduce(rec.commands,function(mem,o){ return mem.concat(o.setsturnvar); },[])));
@@ -273,7 +265,33 @@ Algol.analyze_game = function(def){
 	_.each(def.commands,function(def,n){jot(rec.ids,n,"command");});
 	_.each(def.queries,function(def,n){jot(rec.ids,n,"query");});
 	_.each(def.endgame,function(def,n){jot(rec.ids,n,"endgame");});
+	this.analyze_dependencies(def,rec);
 	return rec;
+};
+
+Algol.analyze_dependencies = function(def,rec){
+	var deps = _.reduce(rec.generators,function(o,agen,gname){
+		_.each(agen.generates,function(g){
+			o[g] = o[g] || ["genquery",[],[]];
+			jot(o[g],1,gname);
+		});
+		return o;
+	},{},this);
+	_.each(["queries","generators","marks","commands"],function(t){
+		_.each(rec[t],function(itema,itemname){
+			deps[itemname] = [t.replace("ies","y").replace(/s$/,""),itema.querydeps||[],itema.markdeps||[]];
+		});
+	});
+	rec.dependencymap = deps;
+	_.each(deps,function(data,name){
+		data[2] = _.uniq(this.analyze_markdepsforentity(deps,name));
+	},this);
+};
+
+Algol.analyze_markdepsforentity = function(deps,name){
+	return deps[name] ? _.reduce(deps[name][1],function(ret,dep){
+		return ret.concat(this.analyze_markdepsforentity(deps,dep));
+	},deps[name][2],this) : [];
 };
 
 Algol.analyze_mark = function(ctx,def,rec){
@@ -786,20 +804,20 @@ Algol.validate_unitturnvarsetname = function(report,ctx,def){
 	report(_.contains(["x","y"],def) && "uses reserved unitturnvar name: "+def);	
 };
 
-Algol.validate_winner = function(report,ctx,def){};
-Algol.validate_intpropname = function(report,ctx,def){};
-Algol.validate_idpropname = function(report,ctx,def){};
-Algol.validate_propname = function(report,ctx,def){};
-Algol.validate_stealobj = function(report,ctx,def){};
-Algol.validate_propobj = function(report,ctx,def){};
-Algol.validate_unitvarqueryname = function(report,ctx,def){};
-Algol.validate_turnpossetname = function(report,ctx,def){};
-Algol.validate_turnvarsetname = function(report,ctx,def){};
-Algol.validate_commandname = function(report,ctx,def){};
-Algol.validate_generatorname = function(report,ctx,def){};
-Algol.validate_endgamename = function(report,ctx,def){};
-Algol.validate_customqueryname = function(report,ctx,def){};
-Algol.validate_markname = function(report,ctx,def){};
+Algol.validate_winner = function(){};
+Algol.validate_intpropname = function(){};
+Algol.validate_idpropname = function(){};
+Algol.validate_propname = function(){};
+Algol.validate_stealobj = function(){};
+Algol.validate_propobj = function(){};
+Algol.validate_unitvarqueryname = function(){};
+Algol.validate_turnpossetname = function(){};
+Algol.validate_turnvarsetname = function(){};
+Algol.validate_commandname = function(){};
+Algol.validate_generatorname = function(){};
+Algol.validate_endgamename = function(){};
+Algol.validate_customqueryname = function(){};
+Algol.validate_markname = function(){};
 
 
 // €€€€€€€€€€€€€ E X P O R T €€€€€€€€€€€€€€€€€€€€€€€€€€

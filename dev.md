@@ -123,6 +123,15 @@ evaluate a query! (needs dependencies?)
 execute command!
 
 
+// ################## D E P E N D E N C I E S ##################
+
+Need to know:
+	atstepstart, what's needed. potmark shit!
+	atmark<blah>, what's needed
+
+only the mark relations are interesting!
+and the genquery sources, but we get that from the above. or do we? hmm.
+
 
 // ################## A N A L Y S I S ##################
 
