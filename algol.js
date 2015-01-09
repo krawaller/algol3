@@ -248,7 +248,7 @@ var jot = function(obj,listname,item){
 };
 
 Algol.analyze_game = function(def){
-	var rec = {queries:{},generators:{},marks:{}}, ctx = {game:def};
+	var rec = {queries:{},generators:{},marks:{},commands:{},ids:{}}, ctx = {game:def};
 	_.each(def.queries,function(qdef,qname){
 		this.analyze_querydef(ctx,qdef,(rec.queries[qname]={}));
 	},this);
@@ -258,6 +258,21 @@ Algol.analyze_game = function(def){
 	_.each(def.marks,function(mdef,mname){
 		this.analyze_mark(ctx,mdef,(rec.marks[mname]={}));
 	},this);
+	_.each(def.commands,function(cdef,cname){
+		this.analyze_command(ctx,cdef,(rec.commands[cname]={}));
+	},this);
+	rec.generatednames = _.uniq(_.compact(_.reduce(rec.generators,function(mem,o){ return mem.concat(o.generates); },[])));
+	rec.turnpositions = _.uniq(_.compact(_.reduce(rec.commands,function(mem,o){ return mem.concat(o.setsturnpos); },[])));
+	rec.turnvars = _.uniq(_.compact(_.reduce(rec.commands,function(mem,o){ return mem.concat(o.setsturnvar); },[])));
+	rec.unitturnvars = _.uniq(_.compact(_.reduce(rec.commands,function(mem,o){ return mem.concat(o.setsunitturnvar); },[])));
+	_.each(rec.generatednames,function(n){jot(rec.ids,n,"generatedquery");});
+	_.each(rec.turnpositions,function(n){jot(rec.ids,n,"turnpos");});
+	_.each(rec.turnvars,function(n){jot(rec.ids,n,"turnvar");});
+	_.each(rec.unitturnvars,function(n){jot(rec.ids,n,"unitturnvar");});
+	_.each(def.marks,function(def,n){jot(rec.ids,n,"mark");});
+	_.each(def.commands,function(def,n){jot(rec.ids,n,"command");});
+	_.each(def.queries,function(def,n){jot(rec.ids,n,"query");});
+	_.each(def.endgame,function(def,n){jot(rec.ids,n,"endgame");});
 	return rec;
 };
 
@@ -272,7 +287,6 @@ Algol.analyze_querydef = function(ctx,def,rec){
 		case "FILTER":
 			jot(rec,"querydeps",def[1]);
 			this.analyze_propobj(ctx,def[2],rec);
-			//_.each(def[2],function(val){ this.analyze_value(ctx,val,rec); },this);
 			break;
 		case "MERGE":
 			jot(rec,"querydeps",def[1]);
@@ -326,6 +340,14 @@ Algol.analyze_generatornames = function(ctx,def,rec){
 };
 
 Algol.analyze_command = function(ctx,def,rec){
+	if (_.isArray(def)) def = {effects:def};
+	this.analyze_boolean(ctx,def.condition,rec);
+	_.each(def.effects,function(e){
+		this.analyze_effect(ctx,e,rec);
+	},this);
+};
+
+Algol.analyze_effect = function(ctx,def,rec){
 	if (_.isArray(def)){
 		switch(def[0]){
 			case "MOVEUNIT":
@@ -336,16 +358,42 @@ Algol.analyze_command = function(ctx,def,rec){
 			case "TURNUNIT":
 				this.analyze_value(ctx,def[1],rec);
 				break;
-			
-			default: throw "Unknown namegendef: "+JSON.stringify(def);
+			case "SETUNITVAR":
+				this.analyze_value(ctx,def[1],rec);
+				this.analyze_value(ctx,def[2],rec);
+				break;
+			case "SETUNITTURNVAR":
+				this.analyze_value(ctx,def[1],rec);
+				jot(rec,"setsunitturnvar",def[2]);
+				this.analyze_value(ctx,def[3],rec);
+				break;
+			case "SETTURNPOS":
+				jot(rec,"setsturnpos",def[1]);
+				this.analyze_positionref(ctx,def[2],rec);
+				break;
+			case "INCREASETURNVAR":
+			case "SETTURNVAR":
+				jot(rec,"setsturnvar",def[1]);
+				this.analyze_value(ctx,def[2],rec);
+				break;
+			case "CREATETERRAIN":
+				this.analyze_positionref(ctx,def[1],rec);
+				this.analyze_propobj(ctx,def[2],rec);
+				jot(rec,"createsterrain","yes");
+				break;
+			default: throw "Unknown effectdef: "+JSON.stringify(def);
 		}
-	}
+	} else throw "Bad effect: "+JSON.stringify(def);
 };
 
 Algol.analyze_value = function(ctx,def,rec){
 	if (_.isArray(def)){
 		switch(def[0]){
 			case "TURNVAR": jot(rec,"turnvardeps",def[1]); break;
+			case "UNITTURNVAR":
+				this.analyze_value(ctx,def[1],rec);
+				jot(rec,"turnvardeps",def[2]);
+				break;
 			case "IDAT": this.analyze_positionref(ctx,def[1],rec); break;
 			case "ISNT": this.analyze_value(ctx,def[1],rec); break;
 			case "IFELSE":
@@ -363,6 +411,11 @@ Algol.analyze_value = function(ctx,def,rec){
 				this.analyze_value(ctx,def[2],rec);
 				break;
 			case "ARTIFACT": break;
+			case "SUM":
+				_.each(_.tail(def),function(b){
+					this.analyze_value(ctx,b,rec);
+				},this);
+				break;
 			default: throw "Unknown valuedef: "+JSON.stringify(def);
 		}
 	}
@@ -423,39 +476,6 @@ Algol.analyze_queryref = function(ctx,def,rec){
 	jot(rec,"querydeps",def);
 };
 
-// --------------------- old analysis
-
-Algol.analyze_generatednames = function(generators){
-	return _.unique(_.flatten(_.reduce(generators,function(ret,gendef){
-		return ret.concat(_.reduce(["name","stepname","stopname"],function(mem,prop){
-			return mem.concat(gendef[prop] ? this.analyze_namesinnamedef(gendef[prop]) : []);
-		},[],this));
-	},[],this)));
-};
-
-Algol.analyze_namesinnamedef = function(ndef){
-	var A = this.analyze_namesinnamedef.bind(this);
-	return ndef[0]==="IFELSE" ? [A(ndef[2]),A(ndef[3])] : _.contains(["IF","UNLESS"],ndef[0]) ? [A(ndef[2])] : [ndef];
-};
-
-Algol.analyze_commandeffects = function(commands){
-	return _.reduce(commands,function(ret,cmnd){
-		return _.reduce(_.isArray(cmnd)?cmnd:cmnd.effects,function(o,effect){
-			return this.analyze_effect(effect,o);
-		},ret,this);
-	},{},this);
-};
-
-Algol.analyze_effect = function(effect,o){
-	switch(effect[0]){
-		case "SETTURNVAR": o.turnvars = _.uniq((o.turnvars||[]).concat(effect[1])); break;
-		case "SETUNITTURNVAR": o.unitturnvars = _.uniq((o.unitturnvars||[]).concat(effect[2])); break;
-		case "SETTURNPOS": o.turnpositions = _.uniq((o.turnpositions||[]).concat(effect[1])); break;
-		case "CREATETERRAIN": o.spawnsterrain = true;
-	}
-	return o;
-};
-
 // €€€€€€€€€€€€€€€€€€€€€€€€€€€ V A L I D A T O R S €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
 
 Algol.validationreporter = function(name){
@@ -505,8 +525,8 @@ Algol.validationreporter = function(name){
 
 Algol.validate_game = function(report,ctx,def){
 	ctx.game = def;
-	ctx.generatednames = this.analyze_generatednames(def.generators);
-	ctx.commandeffects = this.analyze_commandeffects(def.commands);
+	ctx.A = this.analyze_game(def);
+	this.validate_ids(report,ctx,ctx.A.ids);
 	report.flexobj("generators",ctx,def.generators,"generatorname","generatordef");
 	report.flexobj("queries",ctx,def.queries,"customqueryname","customquerydef");
 	report.flexobj("marks",ctx,def.marks,"markname","markdef");
@@ -516,6 +536,12 @@ Algol.validate_game = function(report,ctx,def){
 		condition: ["boolean"],
 		commandcap: "boolean",
 		passto: ["player"]
+	});
+};
+
+Algol.validate_ids = function(report,ctx,def){
+	_.each(def,function(usedfor,n){
+		report(usedfor.length>1 && "Identifiers should be unique, but '"+n+"' is used for: "+usedfor.join(", "));
 	});
 };
 
@@ -640,6 +666,7 @@ Algol.validate_effect = function(report,ctx,def){
 	report.cmnd(ctx,def,{
 		MOVEUNIT: ["id","positionref"],
 		SETTURNVAR: ["turnvarsetname","value"],
+		INCREASETURNVAR: ["turnvarsetname","value"],
 		SETTURNPOS: ["turnpossetname","positionref"],
 		CREATETERRAIN: ["positionref","propobj"],
 		SETUNITTURNVAR: ["id","unitturnvarsetname","value"],
@@ -734,19 +761,19 @@ Algol.validate_dir = function(report,ctx,def){
 };
 
 Algol.validate_queryref = function(report,ctx,def){
-	report(!ctx.game.queries[def] && !_.contains(ctx.generatednames.concat(["UNITS","MYUNITS","OPPUNITS","DEADUNITS","TERRAIN"]),def) && "unknown query ref: "+def);
+	report(!ctx.game.queries[def] && !_.contains(ctx.A.generatednames.concat(["UNITS","MYUNITS","OPPUNITS","DEADUNITS","TERRAIN"]),def) && "unknown query ref: "+def);
 };
 
 Algol.validate_unitturnvarqueryname = function(report,ctx,def){
-	report(!_.contains(ctx.commandeffects.unitturnvars||[],def) && "asks for unitturnvar '"+def+"' which is never set");
+	report(!_.contains(ctx.A.unitturnvars||[],def) && "asks for unitturnvar '"+def+"' which is never set");
 };
 
 Algol.validate_turnvarqueryname = function(report,ctx,def){
-	report(!_.contains(["CURRENTPLAYER"].concat(ctx.commandeffects.turnvars||[]),def) && "asks for turnvar '"+def+"' which is never set");
+	report(!_.contains(["CURRENTPLAYER"].concat(ctx.A.turnvars||[]),def) && "asks for turnvar '"+def+"' which is never set");
 };
 
 Algol.validate_turnposqueryname = function(report,ctx,def){
-	report(!_.contains(ctx.commandeffects.turnpositions||[],def) && "asks for turnposition '"+def+"' which is never set");
+	report(!_.contains(ctx.A.turnpositions||[],def) && "asks for turnposition '"+def+"' which is never set");
 };
 
 Algol.validate_unitvarsetname = function(report,ctx,def){
