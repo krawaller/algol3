@@ -1,6 +1,6 @@
 
 
-// ################## D A T A   T Y P E S ##################
+// ################## G A M E D E F   D A T A   T Y P E S ##################
 
 "MYUNITS": 
 "OPPUNITS": 
@@ -93,6 +93,7 @@ effect
 	SETTURNPOS(name,position)
 	CREATETERRAIN(position,propobj)
 
+// ################## F L O W   D A T A   T Y P E S ##################
 
 save
 	game: gamename,
@@ -111,10 +112,30 @@ save
 		pos: {}
 		unit: {}
 
+state // terrain,units
+	id: {prop:val,...}, ...
+
+queryresult:
+	positions: [ykx,ykx,...]
+	data:
+		ykx: {prop:val,...}, ...
+
 battle
 	cache
 
+aliases: // generate at battlestart
+	plrnumber:
+		MYUNITS: PLR1UNITS
+		OPPUNITS: PLR2UNITS / NOTPLR1UNITS
 
+// ################# Q U E R I E S #####################
+
+A query can be:
+	customquery (defined)
+	generated, needs generator
+	alias: MYUNITS,OPPUNITS
+	predefgroup: UNITS,ALLUNITS,DEADUNITS
+	customgroup: kings
 
 // ################# G A M E   F L O W #####################
 
@@ -122,6 +143,9 @@ click on a square
 evaluate a query! (needs dependencies?)
 execute command!
 
+askForResult(queryref){
+	
+}
 
 // ################## D E P E N D E N C I E S ##################
 

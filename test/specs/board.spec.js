@@ -3,8 +3,8 @@
 if (typeof require === 'function' && typeof module === 'object') {
 	var sinon = require('sinon'),
 		jasmineSinon = require('jasmine-sinon'),
-		Algol = require("../../algol.js"),
-		_ = require("../../lodashmixins.js");
+		Algol = require("../../src/"),
+		_ = require("../../src/lodashmixins.js");
 }
 var R = function(){ return parseInt(_.uniqueId(),10); };
 var RS = function(howmany){ return _.map(_.range(0,howmany),function(){return R();}); };

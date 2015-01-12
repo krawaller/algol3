@@ -13,6 +13,7 @@
 			{"x":4,"y":10,"plr":1},{"x":7,"y":10,"plr":1},{"x":1,"y":7,"plr":1},{"x":10,"y":7,"plr":1}
 		]
 	},
+	"draw": [["fires","TERRAIN"],["amazons","UNITS"]],
 	"queries": {
 		"blocks": ["MERGE","UNITS",{},"TERRAIN",{}]
 	},

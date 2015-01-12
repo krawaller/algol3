@@ -1,0 +1,18 @@
+{
+	"source": "http://www.di.fc.ul.pt/~jpn/gv/sombrero.htm",
+	"boards": {
+		"standard": {
+			"shape": "square",
+			"height": 8,
+			"width": 8
+		}
+	},
+	"setup": {
+		"standard": [
+			{"x":1,"y":1,"plr":1},{"x":2,"y":1,"plr":1},{"x":3,"y":1,"plr":1},{"x":4,"y":1,"plr":1},
+			{"x":1,"y":1,"plr":2},{"x":2,"y":1,"plr":2},{"x":3,"y":1,"plr":2},{"x":4,"y":1,"plr":2},
+			{"x":1,"y":8,"plr":2},{"x":2,"y":8,"plr":2},{"x":3,"y":8,"plr":2},{"x":4,"y":8,"plr":2},
+			{"x":1,"y":8,"plr":1},{"x":2,"y":8,"plr":1},{"x":3,"y":8,"plr":1},{"x":4,"y":8,"plr":1}
+		]
+	}
+}
