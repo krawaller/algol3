@@ -1,18 +1,10 @@
 {
 	"source": "http://www.chessvariants.org/other.dir/amazons.html",
-	"boards": {
-		"standard": {
-			"shape": "square",
-			"height": 10,
-			"width": 10
-		}
-	},
-	"setups": {
-		"standard": [
-			{"x":4,"y":1,"plr":1},{"x":7,"y":1,"plr":1},{"x":1,"y":4,"plr":1},{"x":10,"y":4,"plr":1},
-			{"x":4,"y":10,"plr":1},{"x":7,"y":10,"plr":1},{"x":1,"y":7,"plr":1},{"x":10,"y":7,"plr":1}
-		]
-	},
+	"boards": [10,10],
+	"setups": [
+		{"x":4,"y":1,"plr":1},{"x":7,"y":1,"plr":1},{"x":1,"y":4,"plr":1},{"x":10,"y":4,"plr":1},
+		{"x":4,"y":10,"plr":1},{"x":7,"y":10,"plr":1},{"x":1,"y":7,"plr":1},{"x":10,"y":7,"plr":1}
+	],
 	"draw": [["fires","TERRAIN"],["amazons","UNITS"]],
 	"queries": {
 		"blocks": ["MERGE","UNITS",{},"TERRAIN",{}]

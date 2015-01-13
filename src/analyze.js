@@ -1,6 +1,6 @@
 (function(){
 var _ = (typeof require !== "undefined" ? require("./lodashmixins") : window._);
-function augmentWithAnalyzerFunctions(Algol){
+function augmentWithAnalyzeFunctions(Algol){
 
 
 // €€€€€€€€€€€€€€€€€€€€€€€€€€€ A N A L Y Z E  F U N C T I O N S €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€*/
@@ -264,11 +264,11 @@ Algol.analyze_queryref = function(ctx,def,rec){
 
 // €€€€€€€€€€€€€€€€€€€€€€€€€ E X P O R T €€€€€€€€€€€€€€€€€€€€€€€€€
 
-} // end augmentWithAnalyzerFunctions
+} // end augmentWithAnalyzeFunctions
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
-    module.exports = augmentWithAnalyzerFunctions;
+    module.exports = augmentWithAnalyzeFunctions;
 else
-    window.augmentWithAnalyzerFunctions = augmentWithAnalyzerFunctions;
+    window.augmentWithAnalyzeFunctions = augmentWithAnalyzeFunctions;
 
 })();

@@ -2,7 +2,6 @@
 	"source": "http://www.di.fc.ul.pt/~jpn/gv/daggers.htm",
 	"boards": {
 		"standard": {
-			"shape": "square",
 			"height": 8,
 			"width": 8,
 			"terrain": [
@@ -11,15 +10,13 @@
 			]
 		}
 	},
-	"setups": {
-		"standard": [
-			{"x":4,"y":1,"plr":1,"type":"crown"},{"x":5,"y":1,"plr":1,"type":"crown"},
-			{"x":3,"y":2,"plr":1,"type":"dagger"},{"x":4,"y":2,"plr":1,"type":"dagger"},{"x":5,"y":2,"plr":1,"type":"dagger"},{"x":6,"y":2,"plr":1,"type":"dagger"},
-			{"x":3,"y":8,"plr":2,"type":"crown"},{"x":6,"y":8,"plr":2,"type":"crown"},
-			{"x":2,"y":7,"plr":2,"type":"dagger"},{"x":3,"y":7,"plr":2,"type":"dagger"},{"x":4,"y":7,"plr":2,"type":"dagger"},{"x":5,"y":7,"plr":2,"type":"dagger"},{"x":6,"y":7,"plr":2,"type":"dagger"},{"x":7,"y":7,"plr":2,"type":"dagger"},
-			{"x":3,"y":6,"plr":2,"type":"dagger"},{"x":6,"y":6,"plr":2,"type":"dagger"}
-		]
-	},
+	"setups": [
+		{"x":4,"y":1,"plr":1,"type":"crown"},{"x":5,"y":1,"plr":1,"type":"crown"},
+		{"x":3,"y":2,"plr":1,"type":"dagger"},{"x":4,"y":2,"plr":1,"type":"dagger"},{"x":5,"y":2,"plr":1,"type":"dagger"},{"x":6,"y":2,"plr":1,"type":"dagger"},
+		{"x":3,"y":8,"plr":2,"type":"crown"},{"x":6,"y":8,"plr":2,"type":"crown"},
+		{"x":2,"y":7,"plr":2,"type":"dagger"},{"x":3,"y":7,"plr":2,"type":"dagger"},{"x":4,"y":7,"plr":2,"type":"dagger"},{"x":5,"y":7,"plr":2,"type":"dagger"},{"x":6,"y":7,"plr":2,"type":"dagger"},{"x":7,"y":7,"plr":2,"type":"dagger"},
+		{"x":3,"y":6,"plr":2,"type":"dagger"},{"x":6,"y":6,"plr":2,"type":"dagger"}
+	],
 	"queries": {
 		"mycrowns": ["FILTER","MYUNITS",{"type":"crown"}],
 		"mydaggers": ["FILTER","MYUNITS",{"type":"dagger"}],

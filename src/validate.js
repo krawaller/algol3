@@ -6,13 +6,13 @@ function augmentWithValidateFunctions(Algol){
 // €€€€€€€€€€€€€€€€€€€€€€€€€€€ V A L I D A T E   F U N C T I O N S €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€*/
 
 
-Algol.validationreporter = function(name){
+Algol.reporter = function(name){
 	name = [].concat(name);
 	var rep = function(error,callback){
 		if (error){ console.log("Error:",name.join("_"),error);
 		} else if (callback) { callback.call(Algol); }
 	};
-	rep.sub = function(sub){ return Algol.validationreporter(name.concat(sub)); };
+	rep.sub = function(sub){ return Algol.reporter(name.concat(sub)); };
 	rep.cmnd = function(ctx,arr,poss){
 		if (!_.isArray(arr)) rep("isn't an array");
 		else if (!poss[arr[0]]) rep("has illegal cmnd: "+arr[0]);

@@ -3,15 +3,18 @@ var Algol = {};
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
 	require("./analyze")(Algol);
 	require("./board")(Algol);
-	require("./generator")(Algol);
+	require("./generate")(Algol);
 	require("./time")(Algol);
 	require("./validate")(Algol);
+	require("./report")(Algol);
+	require("./compile")(Algol);
 	module.exports = Algol;
 } else {
-	var Algol = {};
-	window.augmentWithAnalyzerFunctions(Algol);
+	window.augmentWithAnalyzeFunctions(Algol);
 	window.augmentWithBoardFunctions(Algol);
-	window.augmentWithGeneratorFunctions(Algol);
+	window.augmentWithGenerateFunctions(Algol);
 	window.augmentWithTimeFunctions(Algol);
 	window.augmentWithValidateFunctions(Algol);
+	window.augmentWithReportFunctions(Algol);
+	window.augmentWithCompileFunctions(Algol);
 }

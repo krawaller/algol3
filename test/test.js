@@ -6,9 +6,9 @@ var Algol = require("../src/"),
 	daggers = require("../games/daggers.json"),
 	_ = require('lodash');
 
-Algol.validate_game(Algol.validationreporter("amazons"),{},amazons);
-Algol.validate_game(Algol.validationreporter("archers"),{},archers);
-Algol.validate_game(Algol.validationreporter("daggers"),{},daggers);
+Algol.validate_game(Algol.reporter("amazons"),{},amazons);
+Algol.validate_game(Algol.reporter("archers"),{},archers);
+Algol.validate_game(Algol.reporter("daggers"),{},daggers);
 
 var a = Algol.analyze_game(amazons);
 _.each(a,function(o,kind){

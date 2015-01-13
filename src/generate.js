@@ -1,6 +1,6 @@
 (function(){
 var _ = (typeof require !== "undefined" ? require("./lodashmixins") : window._);
-function augmentWithGeneratorFunctions(Algol){
+function augmentWithGenerateFunctions(Algol){
 
 
 
@@ -80,11 +80,11 @@ Algol.floatFromSquare = function(def,pos,dirs,distance,stops,steps,board,ret){
 
 // €€€€€€€€€€€€€€€€€€€€€€€€€ E X P O R T €€€€€€€€€€€€€€€€€€€€€€€€€
 
-} // end augmentWithGeneratorFunctions
+} // end augmentWithGenerateFunctions
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
-    module.exports = augmentWithGeneratorFunctions;
+    module.exports = augmentWithGenerateFunctions;
 else
-    window.augmentWithGeneratorFunctions = augmentWithGeneratorFunctions;
+    window.augmentWithGenerateFunctions = augmentWithGenerateFunctions;
 
 })();

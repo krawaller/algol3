@@ -2,7 +2,6 @@
 	"source": "http://www.di.fc.ul.pt/~jpn/gv/Archers.pdf",
 	"boards": {
 		"standard": {
-			"shape": "square",
 			"height": 9,
 			"width": 9,
 			"terrain": [
