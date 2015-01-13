@@ -7,7 +7,9 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
 	require("./time")(Algol);
 	require("./validate")(Algol);
 	require("./report")(Algol);
+	require("./defaultify")(Algol);
 	require("./compile")(Algol);
+	require("./evaluate")(Algol);
 	module.exports = Algol;
 } else {
 	window.augmentWithAnalyzeFunctions(Algol);
@@ -16,5 +18,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
 	window.augmentWithTimeFunctions(Algol);
 	window.augmentWithValidateFunctions(Algol);
 	window.augmentWithReportFunctions(Algol);
+	window.augmentWithDefaultifyFunctions(Algol);
 	window.augmentWithCompileFunctions(Algol);
+	window.augmentWithEvaluateFunctions(Algol);
 }

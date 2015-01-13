@@ -19,11 +19,10 @@
 	},
 	"endturn": {
 		"condition":["SAME",["TURNVAR","fired"],true],
-		"commandcap": true,
-		"passto": ["IFELSE",["SAME",["TURNVAR","CURRENTPLAYER"],1],2,1]
+		"commandcap": true
 	},
 	"endgame": {
-		"blocked":[["EMPTY","enemymove"],["TURNVAR","CURRENTPLAYER"]]
+		"blocked":[["EMPTY","enemymove"],"CURRENTPLAYER"]
 	},
 	"commands": {
 		"move": [

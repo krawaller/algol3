@@ -6,32 +6,32 @@ if (typeof require === 'function' && typeof module === 'object') {
 		Algol = require("../../src/"),
 		_ = require("../../src/lodashmixins.js");
 }
-var R = function(){ return parseInt(_.uniqueId(),10); },
-	SERIES = function(arr){
-	var i = 0;
-	return function(){ return arr[i++];};
-};
+var R = function(){ return parseInt(_.uniqueId(),10); };
+var RS = function(howmany){ return _.map(_.range(0,howmany),function(){return R();}); };
+var SERIES = function(arr){ var i = 0; return function(){ return arr[i++];}; };
 
-describe("The compile functions",function(){
-	describe("The compileBoardsDef function",function(){
-		describe("when used on Amazons boards def",function(){
-			var result = Algol.compileBoardsDef([8,10]),
-				expected = {
-					standard: {
-						shape: "square",
-						width: 8,
-						height: 10,
-						terrain: []
-					}
-				};
-			it("should return correct val",function(){ expect(result).toEqual(expected); });
+var c = Algol.constants;
+
+describe("the compile functions",function(){
+	describe("the compileValue func",function(){
+		it("is defined",function(){ expect(typeof Algol.compileValue).toEqual("function"); });
+		describe("when called with primitives",function(){
+			var val = R(),
+				expected = [c.RAW,val],
+				ctx = {},
+				res = Algol.compileValue(ctx,val);
+			it("returns value wrapped in raw",function(){
+				expect(res).toEqual(expected);
+			});
 		});
-	});
-	describe("The compileSetupsDef function",function(){
-		describe("when used on Amazons style setups def",function(){
-			var result = Algol.compileSetupsDef([{"x":4,"y":1,"plr":1}]),
-				expected = { standard: [{"x":4,"y":1,"plr":1}] };
-			it("should return correct val",function(){ expect(result).toEqual(expected); });
+		describe("when called with CURRENTPLAYER",function(){
+			var val = "CURRENTPLAYER",
+				ctx = {compFor:R()},
+				expected = [c.RAW,ctx.compFor],
+				res = Algol.compileValue(ctx,val);
+			it("returns ctx.compFor wrapped in raw",function(){
+				expect(res).toEqual(expected);
+			});
 		});
 	});
 });

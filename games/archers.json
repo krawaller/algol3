@@ -34,8 +34,8 @@
 	},
 	"queries": {
 		"opptargets": ["MERGE","OPPUNITS",{"id":"targetid"},"bullseye",{"id":"shooterid"}],
-		"opponentbase": ["FILTER","TERRAIN",{"type":"base","plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
-		"killedoppking": ["FILTER","DEADUNITS",{"type":"king","plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
+		"opponentbase": ["FILTER","TERRAIN",{"type":"base","plr":["ISNT","CURRENTPLAYER"]}],
+		"killedoppking": ["FILTER","DEADUNITS",{"type":"king","plr":["ISNT","CURRENTPLAYER"]}],
 		"infiltrators": ["MERGE","MYUNITS",{"id":"id"},"opponentbase",{}],
 		"gonnakill": ["FILTER","opptargets",{"shooterid":["IDAT","selectunit"]}],
 		"blocks": ["MERGE","UNITS",{},"opparrows",{}]
@@ -48,7 +48,7 @@
 			"relativeto": ["DIRAT","START"],
 			"stops": "UNITS",
 			"max": 3,
-			"stepname": ["IFELSE",["SAME",["LOOKUP","UNITS","START","plr"],["TURNVAR","CURRENTPLAYER"]],"myarrows","opparrows"],
+			"stepname": ["IFELSE",["SAME",["LOOKUP","UNITS","START","plr"],"CURRENTPLAYER"],"myarrows","opparrows"],
 			"stopname": ["IF",["AND",["ANYAT","UNITS","TARGET"],["DIFFERENT",["LOOKUP","UNITS","TARGET","plr"],["LOOKUP","UNITS","START","plr"]]],"bullseye"],
 			"include": ["LOOKUPALL","UNITS","START",["id","plr"]]
 		},
@@ -67,12 +67,11 @@
 	},
 	"endturn": {
 		"condition":["SAME",["TURNVAR","moves"],2],
-		"commandcap": true,
-		"passto": ["IFELSE",["SAME",["TURNVAR","CURRENTPLAYER"],1],2,1]
+		"commandcap": true
 	},
 	"endgame": {
-		"infiltration":[["NOTEMPTY","infiltrators"],["TURNVAR","CURRENTPLAYER"]],
-		"kingkill":[["NOTEMPTY","killedoppking"],["TURNVAR","CURRENTPLAYER"]]
+		"infiltration":[["NOTEMPTY","infiltrators"],"CURRENTPLAYER"],
+		"kingkill":[["NOTEMPTY","killedoppking"],"CURRENTPLAYER"]
 	},
 	"commands": {
 		"stepforward": {

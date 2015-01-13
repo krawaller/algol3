@@ -21,20 +21,19 @@
 		"mycrowns": ["FILTER","MYUNITS",{"type":"crown"}],
 		"mydaggers": ["FILTER","MYUNITS",{"type":"dagger"}],
 		"oppcrowns": ["FILTER","OPPUNITS",{"type":"crown"}],
-		"opponentbase": ["FILTER","TERRAIN",{"type":"base","plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
-		"killedoppcrown": ["FILTER","DEADUNITS",{"type":"crown","plr":["ISNT",["TURNVAR","CURRENTPLAYER"]]}],
+		"opponentbase": ["FILTER","TERRAIN",{"type":"base","plr":["ISNT","CURRENTPLAYER"]}],
+		"killedoppcrown": ["FILTER","DEADUNITS",{"type":"crown","plr":["ISNT","CURRENTPLAYER"]}],
 		"infiltrators": ["MERGE","MYUNITS",{"id":"id"},"opponentbase",{}],
 		"moves": ["FILTER","movetarget",{"id":["IDAT","selectunit"]}],
 		"kills": ["FILTER","killtarget",{"id":["IDAT","selectunit"]}]
 	},
 	"endturn": {
 		"condition":["SAME",["TURNVAR","mademove"],true],
-		"commandcap": true,
-		"passto": ["IFELSE",["SAME",["TURNVAR","CURRENTPLAYER"],1],2,1]
+		"commandcap": true
 	},
 	"endgame": {
-		"infiltration":[["NOTEMPTY","infiltrators"],["TURNVAR","CURRENTPLAYER"]],
-		"kingkill":[["NOTEMPTY","killedoppcrown"],["TURNVAR","CURRENTPLAYER"]]
+		"infiltration":[["NOTEMPTY","infiltrators"],"CURRENTPLAYER"],
+		"kingkill":[["NOTEMPTY","killedoppcrown"],"CURRENTPLAYER"]
 	},
 	"marks": {
 		"selectunit": "MYUNITS",

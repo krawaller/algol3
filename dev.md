@@ -117,6 +117,9 @@ state // terrain,units
 
 queryresult:
 	positions: [ykx,ykx,...]
+	contains:
+		ykx: true,
+		ykx: true, ...
 	data:
 		ykx: {prop:val,...}, ...
 

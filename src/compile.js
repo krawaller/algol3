@@ -3,28 +3,31 @@ var _ = (typeof require !== "undefined" ? require("./lodashmixins") : window._);
 function augmentWithCompileFunctions(Algol){
 
 
-// €€€€€€€€€€€€€€€€€€€€€€€€€€€ R E P O R T E R  F U N C T I O N S €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€*/
+// €€€€€€€€€€€€€€€€€€€€€€€€€€€ C O M P I L E   F U N C T I O N S €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€*/
 
-Algol.compileBoardsDef = function(boards){
-	return _.isArray(boards) ? this.compileBoardsDef({standard:boards}) : _.mapValues(boards,this.compileBoardDef,this);
+var c = Algol.constants = _.extend(Algol.constants||{},{
+	// booleans
+	TRUE: 101,
+	FALSE: 102,
+	NOT: 103,
+	SAME: 104,
+	DIFFERENT: 105,
+	AND: 106,
+	OR: 107,
+	ONEOF: 108,
+	ANYAT: 109,
+	NONEAT: 110,
+	EMPTY: 111,
+	NOTEMPTY: 112,
+	MATCHAT: 113,
+	// values
+	RAW: 201
+});
+
+Algol.compileValue = function(ctx,value){
+	return [c.RAW,{CURRENTPLAYER:ctx.compFor,NEXTPLAYER:ctx.compNext}[value]||value];
 };
 
-Algol.compileBoardDef = function(board){
-	if (_.isArray(board)) board = {width:board[0],height:board[1]};
-	if (board.size){
-		board.width=board.size[0];
-		board.height=board.size[1];
-	}
-	return _.extend({shape:"square",terrain:[]},board);
-};
-
-Algol.compileSetupsDef = function(setups){
-	return _.isArray(setups) ? this.compileSetupsDef({standard:setups}) : _.mapValues(setups,this.compileSetupDef,this);
-};
-
-Algol.compileSetupDef = function(setup){
-	return setup;
-};
 
 // €€€€€€€€€€€€€€€€€€€€€€€€€ E X P O R T €€€€€€€€€€€€€€€€€€€€€€€€€
 
