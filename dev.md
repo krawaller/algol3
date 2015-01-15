@@ -93,12 +93,31 @@ effect
 	SETTURNPOS(name,position)
 	CREATETERRAIN(position,propobj)
 
-// ################## F L O W   D A T A   T Y P E S ##################
+// ################## C O N T E X T   C O N T E N T ##################
 
-save
+def // defaultified gamedef
+
+A // analysis
+
+compdefs // all compiled gamedefs
+	plrnumber: compdef 
+
+currentdef // gamedef compiled for current player
+
+setup // compiled chosen setup from options
+	units: unitsetup // with added id and ykx
+	customgroupnames: []
+	groups:
+		groupname:
+			orig: [id,id,...]
+			now: [id,id,...] // changes during play
+
+board // chosen from setup, with compiled terrain to include id and ykx
+
+state
 	game: gamename,
-	board: boardname, // or none
-	setup: setupname, // or none
+	board: boardname,
+	setup: setupname,
 	unitchanges:
 		{id:{prop:[step,val,...],...},...}
 	terrainchanges:
@@ -106,37 +125,33 @@ save
 	steps:
 		[[plr,cmnd,[mark,x,y],[mark,x,y],...]]
 	status: ["current"/endgame,who]
-	turn:
-		CURRENTPLAYER: plr
-		var: {}
-		pos: {}
-		unit: {}
 
-state // terrain,units
-	id: {prop:val,...}, ...
+step: currentstep
 
-queryresult:
-	positions: [ykx,ykx,...]
-	contains:
-		ykx: true,
-		ykx: true, ...
-	data:
+turn:
+	var: {}
+	pos: {}
+	unit: {}
+marks:
+	markname: ykx, ...
+
+queries:
+	name: 
+		positions: [ykx,ykx,...]
+		data:
+			ykx: [{prop:val,...}], ...
+
+terrain:
+	dead: {id:true,...}
+	state:
 		ykx: {prop:val,...}, ...
 
-battle
-	cache
-
-aliases: // generate at battlestart
-	plrnumber:
-		MYUNITS: PLR1UNITS
-		OPPUNITS: PLR2UNITS / NOTPLR1UNITS
 
 // ################# Q U E R I E S #####################
 
 A query can be:
 	customquery (defined)
 	generated, needs generator
-	alias: MYUNITS,OPPUNITS
 	predefgroup: UNITS,ALLUNITS,DEADUNITS
 	customgroup: kings
 

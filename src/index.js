@@ -10,6 +10,7 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
 	require("./defaultify")(Algol);
 	require("./compile")(Algol);
 	require("./evaluate")(Algol);
+	require("./flow")(Algol);
 	module.exports = Algol;
 } else {
 	window.augmentWithAnalyzeFunctions(Algol);
@@ -21,4 +22,5 @@ if (typeof module !== 'undefined' && typeof module.exports !== 'undefined'){
 	window.augmentWithDefaultifyFunctions(Algol);
 	window.augmentWithCompileFunctions(Algol);
 	window.augmentWithEvaluateFunctions(Algol);
+	window.augmentWithFlowFunctions(Algol);
 }

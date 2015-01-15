@@ -39,16 +39,27 @@ Algol.evaluateBoolean = function(ctx,def){
 };
 
 var RAW = c.RAW;
+var ARTIFACT = c.ARTIFACT;
+var TURNVAR = c.TURNVAR;
 
 Algol.evaluateValue = function(ctx,def){
 	switch(def[0]){
+		case TURNVAR: return ctx.turn.var[def[1]];
+		case ARTIFACT: return ctx.artifact[def[1]];
 		case RAW: return def[1];
 		default: throw "Couldn't eval value: "+def.join(" --- ");
 	}
 };
 
+var UNITORTERRAIN = c.UNITORTERRAIN;
+
 // returns result
-Algol.evaluateGenerator = function(ctx,def){
+Algol.evaluateQuery = function(ctx,def){
+	
+};
+
+// returns result
+Algol.evaluatePos = function(ctx,def){
 	
 };
 

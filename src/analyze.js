@@ -13,11 +13,12 @@ var jot = function(obj,listname,item){
 };
 
 Algol.analyze_game = function(def){
-	var rec = {queries:{},generators:{},marks:{},commands:{},ids:{}}, ctx = {game:def};
+	var rec = {queries:{},generators:{},marks:{},commands:{},ids:{},plrgroups:{}}, ctx = {game:def};
 	_.each(def.queries,function(qdef,qname){ this.analyze_querydef(ctx,qdef,(rec.queries[qname]={})); },this);
 	_.each(def.generators,function(gdef,gname){ this.analyze_generator(ctx,gdef,(rec.generators[gname]={})); },this);
 	_.each(def.marks,function(mdef,mname){ this.analyze_mark(ctx,mdef,(rec.marks[mname]={})); },this);
 	_.each(def.commands,function(cdef,cname){ this.analyze_command(ctx,cdef,(rec.commands[cname]={})); },this);
+	_.each(def.setups,function(cdef,cname){ this.analyze_setupdef(ctx,cdef,rec); },this);
 	rec.generatednames = _.uniq(_.compact(_.reduce(rec.generators,function(mem,o){ return mem.concat(o.generates); },[])));
 	rec.turnpositions = _.uniq(_.compact(_.reduce(rec.commands,function(mem,o){ return mem.concat(o.setsturnpos); },[])));
 	rec.turnvars = _.uniq(_.compact(_.reduce(rec.commands,function(mem,o){ return mem.concat(o.setsturnvar); },[])));
@@ -32,6 +33,15 @@ Algol.analyze_game = function(def){
 	_.each(def.endgame,function(def,n){jot(rec.ids,n,"endgame");});
 	this.analyze_dependencies(def,rec);
 	return rec;
+};
+
+Algol.analyze_setupdef = function(ctx,def,rec){
+	_.each(def,function(unit,id){
+		if (unit.group){
+			jot(rec.plrgroups,unit.group,id);
+			rec.ids[unit.group] = ["plrgroup"];
+		}
+	},this);
 };
 
 Algol.analyze_dependencies = function(def,rec){

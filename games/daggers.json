@@ -66,7 +66,7 @@
 			"dirs": [8,1,2],
 			"forward": 1,
 			"name": ["IFELSE",["ANYAT","OPPUNITS","TARGET"],
-				["IF",["OR",["ANYAT","oppcrowns","TARGET"],["ONEOF",["ARTIFACT","dir"],8,2]],"killtarget"],
+				["IF",["OR",["ANYAT","oppcrowns","TARGET"],["ONEOF","ARTIFACTDIR",8,2]],"killtarget"],
 				["UNLESS",["ANYAT","MYUNITS","TARGET"],"movetarget"]
 			],
 			"include": {"id":["IDAT","START"]}
@@ -77,7 +77,7 @@
 			"dirs": [4,5,6],
 			"stops": "UNITS",
 			"stepname": "movetarget",
-			"stopname":  ["IF",["OR",["ANYAT","oppcrowns","TARGET"],["AND",["ANYAT","OPPUNITS","TARGET"],["ONEOF",["ARTIFACT","dir"],4,6]]],"killtarget"],
+			"stopname":  ["IF",["OR",["ANYAT","oppcrowns","TARGET"],["AND",["ANYAT","OPPUNITS","TARGET"],["ONEOF","ARTIFACTDIR",4,6]]],"killtarget"],
 			"include": {"id":["IDAT","START"]}
 		}
 	}

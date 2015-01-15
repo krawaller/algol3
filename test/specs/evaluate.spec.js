@@ -120,4 +120,29 @@ describe("The evaluate functions",function(){
 			});
 		});
 	});
+	describe("The evaluateValue function",function(){
+		describe("when evaluating RAW",function(){
+			var input = [c.RAW,R()],
+				ctx = {},
+				result = Algol.evaluateValue(ctx,input),
+				expected = input[1];
+			it("should return raw value",function(){ expect(result).toEqual(expected); });
+		});
+		describe("when evaluating ARTIFACT",function(){
+			var artifact = {foo:R()},
+				input = [c.ARTIFACT,"foo"],
+				ctx = {artifact:artifact},
+				result = Algol.evaluateValue(ctx,input),
+				expected = artifact.foo;
+			it("should return requested value from artifact",function(){ expect(result).toEqual(expected); });
+		});
+		describe("when evaluating TURNVAR",function(){
+			var turn = {var:{foo:R()}},
+				input = [c.TURNVAR,"foo"],
+				ctx = {turn:turn},
+				result = Algol.evaluateValue(ctx,input),
+				expected = turn.var.foo;
+			it("should return requested value from artifact",function(){ expect(result).toEqual(expected); });
+		});
+	});
 });

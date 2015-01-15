@@ -63,7 +63,7 @@ Algol.validate_game = function(report,ctx,def){
 	report.fixobj("endturn",ctx,def.endturn,{
 		condition: ["boolean"],
 		commandcap: "boolean",
-		passto: ["player"]
+		passto: "player"
 	});
 };
 
@@ -218,8 +218,8 @@ Algol.validate_value = function(report,ctx,def){
 			IFELSE: ["boolean","value","value"],
 			LOOKUP: ["queryref","positionref","propname"]
 		});
-	} else if (!((_.isString(def)&&def!==def.toUpperCase())||_.isNumber(def)||_.isBoolean(def))){
-		report("has illegal value: "+def);
+	} else if (!((_.isString(def)&&({ARTIFACTDIR:1,ARTIFACTORIGDIR:1,CURRENTPLAYER:1}[def]||def!==def.toUpperCase()))||_.isNumber(def)||_.isBoolean(def))){
+		report("has illeeegal value: "+def);
 	}
 };
 

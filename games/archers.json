@@ -17,10 +17,10 @@
 	"setups": {
 		"standard": [
 			{"x":2,"y":2,"type":"archer","plr":1},{"x":3,"y":2,"type":"archer","plr":1},{"x":4,"y":2,"type":"archer","plr":1},
-			{"x":2,"y":3,"type":"archer","plr":1},{"x":3,"y":3,"type":"king","plr":1},{"x":4,"y":3,"type":"archer","plr":1},
+			{"x":2,"y":3,"type":"archer","plr":1},{"x":3,"y":3,"type":"king","plr":1,"group":"kings"},{"x":4,"y":3,"type":"archer","plr":1},
 			{"x":2,"y":4,"type":"archer","plr":1},{"x":3,"y":4,"type":"archer","plr":1},{"x":4,"y":4,"type":"archer","plr":1},
 			{"x":6,"y":6,"type":"archer","plr":2},{"x":7,"y":6,"type":"archer","plr":2},{"x":8,"y":6,"type":"archer","plr":2},
-			{"x":6,"y":7,"type":"archer","plr":2},{"x":7,"y":7,"type":"king","plr":2},{"x":8,"y":7,"type":"archer","plr":2},
+			{"x":6,"y":7,"type":"archer","plr":2},{"x":7,"y":7,"type":"king","plr":2,"group":"kings"},{"x":8,"y":7,"type":"archer","plr":2},
 			{"x":6,"y":8,"type":"archer","plr":2},{"x":7,"y":8,"type":"archer","plr":2},{"x":8,"y":8,"type":"archer","plr":2}
 		],
 		"nokings": [
@@ -58,7 +58,7 @@
 			"dirs": [1,5],
 			"relativeto": ["DIRAT","START"],
 			"forward": 1,
-			"name": ["IF",["NONEAT","blocks","TARGET"],["IFELSE",["SAME",["ARTIFACT","originaldir"],1],"forwardfooting","backwardfooting"]],
+			"name": ["IF",["NONEAT","blocks","TARGET"],["IFELSE",["SAME","ARTIFACTORIGDIR",1],"forwardfooting","backwardfooting"]],
 			"include": {"id":["IDAT","START"]}
 		}
 	},
@@ -91,11 +91,11 @@
 			]
 		},
 		"turnleft": [
-			["SETUNITVAR",["IDAT","selectunit"],"dir",["TURN",["DIRAT","selectunit"],-1]],
+			["TURNUNIT",["IDAT","selectunit"],-1],
 			["INCREASETURNVAR","moves",1]
 		],
 		"turnright": [
-			["SETUNITVAR",["IDAT","selectunit"],"dir",["TURN",["DIRAT","selectunit"],1]],
+			["TURNUNIT",["IDAT","selectunit"],1],
 			["INCREASETURNVAR","moves",1]
 		],
 		"fire": {
