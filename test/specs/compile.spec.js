@@ -54,28 +54,28 @@ describe("the compile functions",function(){
 	describe("the compileQueryref func",function(){
 		it("is defined",function(){ expect(typeof Algol.compileQueryref).toEqual("function"); });
 		describe("when called with MYUNITS for plr 1",function(){
-			var expected = [c.PLR1UNITS],
+			var expected = [c.UNITORTERRAIN,"PLR1UNITS"],
 				ctx = {compFor:1},
 				val = "MYUNITS",
 				res = Algol.compileQueryref(ctx,val);
 			it("returns PLR1UNITS",function(){ expect(res).toEqual(expected); });
 		});
 		describe("when called with MYUNITS for plr 2",function(){
-			var expected = [c.PLR2UNITS],
+			var expected = [c.UNITORTERRAIN,"PLR2UNITS"],
 				ctx = {compFor:2},
 				val = "MYUNITS",
 				res = Algol.compileQueryref(ctx,val);
 			it("returns PLR2UNITS",function(){ expect(res).toEqual(expected); });
 		});
 		describe("when called with OPPUNITS for plr 1",function(){
-			var expected = [c.PLR2UNITS],
+			var expected = [c.UNITORTERRAIN,"PLR2UNITS"],
 				ctx = {compFor:1,compNext:2},
 				val = "OPPUNITS",
 				res = Algol.compileQueryref(ctx,val);
 			it("returns PLR2UNITS",function(){ expect(res).toEqual(expected); });
 		});
 		describe("when called with OPPUNITS for plr 2",function(){
-			var expected = [c.PLR1UNITS],
+			var expected = [c.UNITORTERRAIN,"PLR1UNITS"],
 				ctx = {compFor:2,compNext:1},
 				val = "OPPUNITS",
 				res = Algol.compileQueryref(ctx,val);
@@ -102,7 +102,8 @@ describe("the compile functions",function(){
 				NONPLR2UNITS: [0],
 				foo: [0]
 			},
-			start: [{x:1,y:1,plr:1,group:"foo",id:0,ykx:1001},{x:2,y:2,plr:2,id:1,ykx:2002}]
+			units: [{x:1,y:1,plr:1,group:"foo",id:0,ykx:1001,alive:true},{x:2,y:2,plr:2,id:1,ykx:2002,alive:true}],
+			customgroupnames: ["foo"]
 		};
 		var res = Algol.compileSetup(context,setup);
 		it("compiles correctly",function(){ expect(res).toEqual(expected); });

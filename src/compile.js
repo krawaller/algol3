@@ -35,7 +35,9 @@ var c = Algol.constants = _.extend(Algol.constants||{},{
 	ALLUNITS: 405,
 	UNITS: 406,
 	GENQUERY: 407,
-	UNITORTERRAIN: 408
+	UNITORTERRAIN: 408,
+	TERRAIN: 409,
+	ALLTERRAIN: 410
 });
 
 Algol.compileContext = function(ctx){
