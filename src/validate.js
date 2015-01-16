@@ -52,8 +52,8 @@ Algol.reporter = function(name){
 };
 
 Algol.validate_game = function(report,ctx,def){
-	ctx.game = def;
-	ctx.A = this.analyze_game(def);
+	ctx.def = def;
+	ctx.A = ctx.A || this.analyze_game(def);
 	this.validate_ids(report,ctx,ctx.A.ids);
 	report.flexobj("generators",ctx,def.generators,"generatorname","generatordef");
 	report.flexobj("queries",ctx,def.queries,"customqueryname","customquerydef");
@@ -131,7 +131,8 @@ Algol.validate_generator_offset = function(report,ctx,def){
 Algol.validate_customquerydef = function(report,ctx,def){
 	report.cmnd(ctx,def,{
 		FILTER: ["queryref","matchobj"],
-		MERGE: ["queryref","stealobj","queryref","stealobj"]
+		MERGE: ["queryref","stealobj","queryref","stealobj"],
+		OVERLAPLEFT: ["queryref","queryref"],
 	},function(){
 		// TODO - validate propnames and shit in stealobjs
 	});
@@ -199,7 +200,8 @@ Algol.validate_effect = function(report,ctx,def){
 		CREATETERRAIN: ["positionref","propobj"],
 		SETUNITTURNVAR: ["id","unitturnvarsetname","value"],
 		SETUNITVAR: ["id","unitvarsetname","value"],
-		KILLUNIT: ["id"]
+		KILLUNIT: ["id"],
+		TURNUNIT: ["id","value"]
 	});
 };
 
@@ -270,7 +272,7 @@ Algol.validate_positionref = function(report,ctx,def){
 	} else if (_.contains(["START","TARGET"],def)){
 		report(!ctx.generator && "artifact position "+def+" used outside generator context!");	
 	} else {
-		report(!ctx.game.marks[def] && "has invalid positionref: "+def);
+		report(!ctx.def.marks[def] && "has invalid positionref: "+def);
 	}
 };
 
@@ -289,7 +291,7 @@ Algol.validate_dir = function(report,ctx,def){
 };
 
 Algol.validate_queryref = function(report,ctx,def){
-	report(!ctx.game.queries[def] && !_.contains(ctx.A.generatednames.concat(["UNITS","MYUNITS","OPPUNITS","DEADUNITS","TERRAIN"]),def) && "unknown query ref: "+def);
+	report(!ctx.def.queries[def] && !_.contains(ctx.A.generatednames.concat(["UNITS","MYUNITS","OPPUNITS","DEADUNITS","TERRAIN"]),def) && "unknown query ref: "+def);
 };
 
 Algol.validate_unitturnvarqueryname = function(report,ctx,def){

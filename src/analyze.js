@@ -13,7 +13,7 @@ var jot = function(obj,listname,item){
 };
 
 Algol.analyze_game = function(def){
-	var rec = {queries:{},generators:{},marks:{},commands:{},ids:{},plrgroups:{}}, ctx = {game:def};
+	var rec = {queries:{},generators:{},marks:{},commands:{},ids:{},plrgroups:{}}, ctx = {def:def};
 	_.each(def.queries,function(qdef,qname){ this.analyze_querydef(ctx,qdef,(rec.queries[qname]={})); },this);
 	_.each(def.generators,function(gdef,gname){ this.analyze_generator(ctx,gdef,(rec.generators[gname]={})); },this);
 	_.each(def.marks,function(mdef,mname){ this.analyze_mark(ctx,mdef,(rec.marks[mname]={})); },this);
@@ -84,6 +84,10 @@ Algol.analyze_querydef = function(ctx,def,rec){
 		case "MERGE":
 			jot(rec,"querydeps",def[1]);
 			jot(rec,"querydeps",def[3]);
+			break;
+		case "OVERLAPLEFT":
+			jot(rec,"querydeps",def[1]);
+			jot(rec,"querydeps",def[2]);
 			break;
 		default: throw "Unknown querydef: "+def[0];
 	}
@@ -260,7 +264,7 @@ Algol.analyze_positionref = function(ctx,def,rec){
 			case "TURNPOS": jot(rec,"turnposdeps",def[1]); break;
 			default: throw "Unknown positiondef: "+def[0];
 		}
-	} else if (ctx.game.marks[def]){
+	} else if (ctx.def.marks[def]){
 		jot(rec,"markdeps",def);
 	}
 };

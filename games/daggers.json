@@ -23,7 +23,7 @@
 		"oppcrowns": ["FILTER","OPPUNITS",{"type":"crown"}],
 		"opponentbase": ["FILTER","TERRAIN",{"type":"base","plr":["ISNT","CURRENTPLAYER"]}],
 		"killedoppcrown": ["FILTER","DEADUNITS",{"type":"crown","plr":["ISNT","CURRENTPLAYER"]}],
-		"infiltrators": ["MERGE","MYUNITS",{"id":"id"},"opponentbase",{}],
+		"infiltrators": ["OVERLAPLEFT","MYUNITS","opponentbase"],
 		"moves": ["FILTER","movetarget",{"id":["IDAT","selectunit"]}],
 		"kills": ["FILTER","killtarget",{"id":["IDAT","selectunit"]}]
 	},

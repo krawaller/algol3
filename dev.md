@@ -141,11 +141,6 @@ queries:
 		data:
 			ykx: [{prop:val,...}], ...
 
-terrain:
-	dead: {id:true,...}
-	state:
-		ykx: {prop:val,...}, ...
-
 
 // ################# Q U E R I E S #####################
 

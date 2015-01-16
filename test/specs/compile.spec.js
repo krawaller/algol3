@@ -81,6 +81,13 @@ describe("the compile functions",function(){
 				res = Algol.compileQueryref(ctx,val);
 			it("returns PLR1UNITS",function(){ expect(res).toEqual(expected); });
 		});
+		describe("when called with gamedefined query",function(){
+			var ctx = {A:{dependencymap:{},plrgroups:{}},def:{queries:{foo:["OVERLAPLEFT","UNITS","TERRAIN"]}}},
+				val = "foo",
+				res = Algol.compileQueryref(ctx,val),
+				expected = [c.GAMEQUERY,"foo",[c.OVERLAPLEFT,[c.UNITORTERRAIN,"UNITS"],[c.UNITORTERRAIN,"TERRAIN"]]];
+			it("returns wrapped query",function(){ expect(res).toEqual(expected); });
+		});
 	});
 	describe("the compilePositionref func",function(){
 		describe("when called with MARKREF",function(){

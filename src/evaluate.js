@@ -41,6 +41,8 @@ Algol.evaluateBoolean = function(ctx,def){
 var RAW = c.RAW;
 var ARTIFACT = c.ARTIFACT;
 var TURNVAR = c.TURNVAR;
+var GAMEQUERY = c.GAMEQUERY;
+var GENQUERY = c.GENQUERY;
 
 Algol.evaluateValue = function(ctx,def){
 	switch(def[0]){
@@ -54,14 +56,56 @@ Algol.evaluateValue = function(ctx,def){
 var UNITORTERRAIN = c.UNITORTERRAIN;
 
 // returns result
-Algol.evaluateQuery = function(ctx,def){
-	
+Algol.evaluateQueryRef = function(ctx,def){
+	switch(def[0]){
+		case UNITORTERRAIN: return ctx.queries[def[1]]; // will always be loaded!
+		case GAMEQUERY: return ctx.queries[def[1]] || (ctx.queries[def[1]] = this.evaluateGameQueryRef(ctx,def[0]));
+		case GENQUERY: return ctx.queries[def[1]] || (ctx.queries[def[1]] = this.evaluateGeneratedQueryRef(ctx,def[0]));
+	}
 };
 
 // returns result
 Algol.evaluatePos = function(ctx,def){
-	
+	return def;
 };
+
+var OVERLAPLEFT = c.OVERLAPLEFT;
+var MERGE = c.MERGE;
+
+function steal(from,plan){
+	return _.reduce(plan,function(ret,newname,oldname){
+		ret[newname] = from[oldname];
+		return ret;
+	},{});
+}
+
+Algol.evaluateGameQueryRef = function(ctx,q){
+	switch(q[0]){
+		case OVERLAPLEFT:
+			var left = this.evaluateQueryRef(ctx,q[1]), right = this.evaluateQueryRef(ctx,q[2]);
+			return _.reduce(left.positions,function(ret,pos){
+				if (right.data[pos]){
+					ret.positions.push(pos);
+					ret.data[pos] = left.data[pos];
+				}
+				return ret;
+			},{positions:[],data:{}});
+		case MERGE: 
+			var mleft = this.evaluateQueryRef(ctx,q[1]), mright = this.evaluateQueryRef(ctx,q[3]);
+			return _.reduce(mleft.positions,function(ret,pos){
+				if (mright.data[pos]){
+					ret.positions.push(pos);
+					ret.data[pos] = _.extend(steal(mleft.data[pos],q[2]),steal(mright.data[pos],q[4]));
+				}
+				return ret;
+			},{positions:[],data:{}});
+	}
+};
+
+Algol.evaluateGeneratedQueryRef = function(ctx,gdef){
+
+};
+
 
 // €€€€€€€€€€€€€€€€€€€€€€€€€ E X P O R T €€€€€€€€€€€€€€€€€€€€€€€€€
 

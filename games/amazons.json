@@ -7,7 +7,7 @@
 	],
 	"draw": [["fires","TERRAIN"],["amazons","UNITS"]],
 	"queries": {
-		"blocks": ["MERGE","UNITS",{},"TERRAIN",{}]
+		"blocks": ["OVERLAPLEFT","UNITS","TERRAIN"]
 	},
 	"marks": {
 		"selectunit": {

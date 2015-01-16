@@ -36,9 +36,9 @@
 		"opptargets": ["MERGE","OPPUNITS",{"id":"targetid"},"bullseye",{"id":"shooterid"}],
 		"opponentbase": ["FILTER","TERRAIN",{"type":"base","plr":["ISNT","CURRENTPLAYER"]}],
 		"killedoppking": ["FILTER","DEADUNITS",{"type":"king","plr":["ISNT","CURRENTPLAYER"]}],
-		"infiltrators": ["MERGE","MYUNITS",{"id":"id"},"opponentbase",{}],
+		"infiltrators": ["OVERLAPLEFT","MYUNITS","opponentbase"],
 		"gonnakill": ["FILTER","opptargets",{"shooterid":["IDAT","selectunit"]}],
-		"blocks": ["MERGE","UNITS",{},"opparrows",{}]
+		"blocks": ["OVERLAPLEFT","UNITS","opparrows"]
 	},
 	"generators": {
 		"arrows": {
@@ -50,7 +50,7 @@
 			"max": 3,
 			"stepname": ["IFELSE",["SAME",["LOOKUP","UNITS","START","plr"],"CURRENTPLAYER"],"myarrows","opparrows"],
 			"stopname": ["IF",["AND",["ANYAT","UNITS","TARGET"],["DIFFERENT",["LOOKUP","UNITS","TARGET","plr"],["LOOKUP","UNITS","START","plr"]]],"bullseye"],
-			"include": ["LOOKUPALL","UNITS","START",["id","plr"]]
+			"include":  ["LOOKUPALL","UNITS","START",["id","plr"]]
 		},
 		"footing": {
 			"type": "offset",
