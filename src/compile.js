@@ -64,7 +64,7 @@ var c = Algol.constants = _.extend(Algol.constants||{},{
 	LOOKUPALL: 801
 });
 
-c = _.mapValues(c,function(val,key){return "_"+key;});
+c = Algol.constants = _.mapValues(c,function(val,key){return "_"+key;});
 
 var rev = _.invert(c);
 

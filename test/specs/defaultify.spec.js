@@ -13,9 +13,9 @@ var R = function(){ return parseInt(_.uniqueId(),10); },
 };
 
 describe("The defaultify functions",function(){
-	describe("The defaultifyBoardsDef function",function(){
+	describe("The defaultifyBoards function",function(){
 		describe("when used on Amazons boards def",function(){
-			var result = Algol.defaultifyBoardsDef([8,10]),
+			var result = Algol.defaultifyBoards([8,10]),
 				expected = {
 					standard: {
 						shape: "square",
@@ -27,9 +27,9 @@ describe("The defaultify functions",function(){
 			it("should return correct val",function(){ expect(result).toEqual(expected); });
 		});
 	});
-	describe("The defaultifySetupsDef function",function(){
+	describe("The defaultifySetups function",function(){
 		describe("when used on Amazons style setups def",function(){
-			var result = Algol.defaultifySetupsDef([{"x":4,"y":1,"plr":1}]),
+			var result = Algol.defaultifySetups([{"x":4,"y":1,"plr":1}]),
 				expected = { standard: [{"x":4,"y":1,"plr":1}] };
 			it("should return correct val",function(){ expect(result).toEqual(expected); });
 		});
